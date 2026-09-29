@@ -26,6 +26,15 @@ services:
       USER: odoo
       PASSWORD: odoo
     restart: unless-stopped
+    command: >
+      odoo
+      --database=cafeteria
+      --db_host=db
+      --db_port=5432
+      --db_user=odoo
+      --db_password=odoo
+      --init=modulo_cafeteria
+      --without-demo=all
 
 volumes:
   cafeteria_db_data:
