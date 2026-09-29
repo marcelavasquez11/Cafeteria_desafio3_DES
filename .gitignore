@@ -1,0 +1,16 @@
+﻿# Python
+__pycache__/
+*.pyc
+
+# Odoo
+*.log
+
+# Entorno
+.env
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini

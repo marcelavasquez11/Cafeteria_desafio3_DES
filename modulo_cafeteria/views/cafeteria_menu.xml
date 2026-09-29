@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- Acción principal del módulo -->
+    <record id="action_cafeteria" model="ir.actions.act_window">
+        <field name="name">Cafetería</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menú principal -->
+    <menuitem
+        id="menu_cafeteria_root"
+        name="Cafetería"
+        sequence="10"
+    />
+
+    <!-- Submenú Productos -->
+    <menuitem
+        id="menu_cafeteria_productos"
+        name="Productos"
+        parent="menu_cafeteria_root"
+        action="action_cafeteria"
+        sequence="10"
+    />
+
+</odoo>
