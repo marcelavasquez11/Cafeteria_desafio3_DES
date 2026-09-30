@@ -1,23 +1,23 @@
-from odoo import models, fields
+from odoo import api, fields, models
 
 
 class ProductoCafeteria(models.Model):
-    _inherit = 'product.template'
+    _inherit = "product.template"
 
-    tipo_producto_cafeteria = fields.Selection(
-        [
-            ('bebida', 'Bebida'),
-            ('comida', 'Comida'),
-            ('reposteria', 'Repostería'),
-        ],
-        string='Tipo de producto'
+    stock_minimo = fields.Float(
+        string="Stock mínimo",
+        default=0,
     )
 
-    tamano = fields.Selection(
-        [
-            ('pequeno', 'Pequeño'),
-            ('mediano', 'Mediano'),
-            ('grande', 'Grande'),
-        ],
-        string='Tamaño'
+    stock_bajo = fields.Boolean(
+        string="Stock bajo",
+        compute="_compute_stock_bajo",
     )
+
+    @api.depends("stock_minimo", "qty_available")
+    def _compute_stock_bajo(self):
+        for producto in self:
+            producto.stock_bajo = (
+                producto.stock_minimo > 0
+                and producto.qty_available <= producto.stock_minimo
+            )

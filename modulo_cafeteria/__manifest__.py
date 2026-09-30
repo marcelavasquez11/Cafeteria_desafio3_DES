@@ -25,6 +25,7 @@
     'contacts',
     'product',
     'sale_management',
+    'sale_stock',
     'stock',
     'account',
     ],
@@ -33,7 +34,17 @@
         'security/ir.model.access.csv',
         'views/producto_views.xml',
          'views/cafeteria_menu.xml',
+         "views/product_cafeteria_views.xml",
+        'data/productos_seed.xml',
+        "views/sale_order_views.xml",
+        'views/account_move_cafeteria_views.xml',
     ],
+
+    'assets': {
+        'web.assets_web': [
+            'modulo_cafeteria/static/src/scss/cafeteria.scss',
+        ],
+    },
 
     'installable': True,
     'application': True,

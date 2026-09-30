@@ -2,12 +2,87 @@
 
 <odoo>
 
+    <!-- Vista Kanban personalizada para los productos -->
+    <record id="view_product_template_kanban_cafeteria" model="ir.ui.view">
+        <field name="name">product.template.kanban.cafeteria</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+
+            <kanban class="o_cafeteria_kanban">
+                <field name="name"/>
+                <field name="list_price"/>
+                <field name="categ_id"/>
+                <field name="qty_available"/>
+                <field name="image_128"/>
+                <field name="stock_bajo"/>
+
+                <templates>
+                    <t t-name="card">
+
+                        <div class="oe_kanban_global_click"
+                             style="width: 100%; box-sizing: border-box; padding: 12px;">
+
+                            <!-- Imagen del producto -->
+                            <div style="text-align: center; margin-bottom: 10px;">
+                                <field name="image_128"
+                                       widget="image"
+                                       class="cafeteria_product_image"
+                                       options="{'size': [96, 96]}"/>
+                            </div>
+
+                            <!-- Nombre -->
+                            <div style="margin-bottom: 8px;">
+                                <strong style="font-size: 16px;">
+                                    <field name="name"/>
+                                </strong>
+                            </div>
+
+                            <!-- Precio -->
+                            <div style="margin-bottom: 3px;">
+                                <strong>Precio: </strong>
+                                <field name="list_price"
+                                       widget="monetary"/>
+                            </div>
+
+                            <!-- Categoría -->
+                            <div style="margin-bottom: 3px;">
+                                <strong>Categoría: </strong>
+                                <field name="categ_id"/>
+                            </div>
+
+                            <!-- Stock -->
+                            <div>
+                                <strong>Stock: </strong>
+                                <field name="qty_available"/>
+                            </div>
+
+                            <!-- Alerta de stock bajo -->
+                            <div t-if="record.stock_bajo.raw_value"
+                                 style="margin-top: 6px;">
+                                <strong>⚠️ Stock bajo</strong>
+                            </div>
+
+                        </div>
+
+                    </t>
+                </templates>
+
+            </kanban>
+
+        </field>
+    </record>
+
+
     <!-- Acción principal del módulo -->
     <record id="action_cafeteria" model="ir.actions.act_window">
         <field name="name">Cafetería</field>
         <field name="res_model">product.template</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
+
+        <!-- Usar nuestra vista Kanban -->
+        <field name="view_id" ref="view_product_template_kanban_cafeteria"/>
     </record>
+
 
     <!-- Menú principal -->
     <menuitem
@@ -16,6 +91,7 @@
         sequence="10"
     />
 
+
     <!-- Submenú Productos -->
     <menuitem
         id="menu_cafeteria_productos"
@@ -23,6 +99,14 @@
         parent="menu_cafeteria_root"
         action="action_cafeteria"
         sequence="10"
+    />
+
+    <menuitem
+        id="menu_cafeteria_ventas"
+        name="Ventas"
+        parent="menu_cafeteria_root"
+        action="sale.action_orders"
+        sequence="20"
     />
 
 </odoo>

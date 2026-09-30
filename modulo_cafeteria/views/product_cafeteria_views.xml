@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <record id="view_product_template_form_cafeteria"
+            model="ir.ui.view">
+
+        <field name="name">product.template.form.cafeteria</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+
+        <field name="arch" type="xml">
+
+            <!-- Cambiar etiquetas -->
+            <xpath expr="//field[@name='list_price']"
+                   position="attributes">
+                <attribute name="string">Precio de venta</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='standard_price']"
+                   position="attributes">
+                <attribute name="string">Costo</attribute>
+            </xpath>
+
+            <!-- Categoría -->
+            <xpath expr="//field[@name='categ_id']"
+                   position="attributes">
+                <attribute name="string">Categoría</attribute>
+            </xpath>
+
+            <!-- Referencia -->
+            <xpath expr="//field[@name='default_code']"
+                   position="attributes">
+                <attribute name="string">Referencia</attribute>
+            </xpath>
+
+            <!-- Código de barras -->
+            <xpath expr="//field[@name='barcode']"
+                   position="attributes">
+                <attribute name="string">Código de barras</attribute>
+            </xpath>
+
+            <!-- Stock mínimo -->
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="stock_minimo"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

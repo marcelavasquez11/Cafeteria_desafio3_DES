@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <record id="view_sale_order_form_cafeteria" model="ir.ui.view">
+        <field name="name">sale.order.form.cafeteria</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+
+        <field name="arch" type="xml">
+
+            <!-- Ocultar impuestos de las líneas -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='tax_ids']"
+                   position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+
+            <!-- Ocultar impuestos al editar una línea -->
+            <xpath expr="//field[@name='order_line']/form//field[@name='tax_ids']"
+                   position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='tax_totals']" position="attributes">
+                <attribute name="class" add="o_cafeteria_sale_tax_totals" separator=" "/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+    <record id="categoria_bebidas_calientes" model="product.category">
+        <field name="name">Bebidas calientes</field>
+    </record>
+    <record id="categoria_bebidas_frias" model="product.category">
+        <field name="name">Bebidas frías</field>
+    </record>
+    <record id="categoria_panaderia" model="product.category">
+        <field name="name">Panadería</field>
+    </record>
+    <record id="categoria_reposteria" model="product.category">
+        <field name="name">Repostería</field>
+    </record>
+    <record id="categoria_comida" model="product.category">
+        <field name="name">Comida preparada</field>
+    </record>
+
+    <record id="producto_seed_croissant" model="product.template">
+        <field name="name">Croissant de mantequilla</field>
+        <field name="default_code">CAF-001</field>
+        <field name="categ_id" ref="categoria_panaderia"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">2.50</field>
+        <field name="standard_price">0.90</field>
+        <field name="stock_minimo">5</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/croissant.jpg"/>
+    </record>
+    <record id="producto_seed_latte" model="product.template">
+        <field name="name">Latte</field>
+        <field name="default_code">CAF-002</field>
+        <field name="categ_id" ref="categoria_bebidas_calientes"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">3.00</field>
+        <field name="standard_price">1.10</field>
+        <field name="stock_minimo">8</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/latte.jpg"/>
+    </record>
+    <record id="producto_seed_capuchino" model="product.template">
+        <field name="name">Capuchino</field>
+        <field name="default_code">CAF-003</field>
+        <field name="categ_id" ref="categoria_bebidas_calientes"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">2.80</field>
+        <field name="standard_price">1.00</field>
+        <field name="stock_minimo">6</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/capuchino.jpg"/>
+    </record>
+    <record id="producto_seed_te_chai" model="product.template">
+        <field name="name">Té chai</field>
+        <field name="default_code">CAF-004</field>
+        <field name="categ_id" ref="categoria_bebidas_calientes"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">2.60</field>
+        <field name="standard_price">0.80</field>
+        <field name="stock_minimo">5</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/te_chai.jpg"/>
+    </record>
+    <record id="producto_seed_sandwich" model="product.template">
+        <field name="name">Sándwich de pollo</field>
+        <field name="default_code">CAF-005</field>
+        <field name="categ_id" ref="categoria_comida"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">5.50</field>
+        <field name="standard_price">2.50</field>
+        <field name="stock_minimo">4</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/sandwich.jpg"/>
+    </record>
+    <record id="producto_seed_muffin" model="product.template">
+        <field name="name">Muffin de arándanos</field>
+        <field name="default_code">CAF-006</field>
+        <field name="categ_id" ref="categoria_reposteria"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">2.20</field>
+        <field name="standard_price">0.75</field>
+        <field name="stock_minimo">6</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/muffin.jpg"/>
+    </record>
+    <record id="producto_seed_dona" model="product.template">
+        <field name="name">Dona glaseada</field>
+        <field name="default_code">CAF-007</field>
+        <field name="categ_id" ref="categoria_reposteria"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">1.80</field>
+        <field name="standard_price">0.50</field>
+        <field name="stock_minimo">6</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/dona.jpg"/>
+    </record>
+    <record id="producto_seed_limonada" model="product.template">
+        <field name="name">Limonada natural</field>
+        <field name="default_code">CAF-008</field>
+        <field name="categ_id" ref="categoria_bebidas_frias"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">2.40</field>
+        <field name="standard_price">0.70</field>
+        <field name="stock_minimo">5</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/limonada.jpg"/>
+    </record>
+    <record id="producto_seed_zumo_naranja" model="product.template">
+        <field name="name">Zumo de naranja</field>
+        <field name="default_code">CAF-009</field>
+        <field name="categ_id" ref="categoria_bebidas_frias"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">2.70</field>
+        <field name="standard_price">0.90</field>
+        <field name="stock_minimo">5</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/zumo_naranja.jpg"/>
+    </record>
+    <record id="producto_seed_tarta_chocolate" model="product.template">
+        <field name="name">Tarta de chocolate</field>
+        <field name="default_code">CAF-010</field>
+        <field name="categ_id" ref="categoria_reposteria"/>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">3.50</field>
+        <field name="standard_price">1.40</field>
+        <field name="stock_minimo">4</field>
+        <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/tarta_chocolate.jpg"/>
+    </record>
+    </data>
+</odoo>

@@ -1,0 +1,24 @@
+.o_cafeteria_kanban .o_kanban_record {
+    flex: 0 1 220px !important;
+    width: 220px !important;
+    max-width: calc(100vw - 2rem);
+}
+
+.o_cafeteria_kanban .oe_kanban_global_click {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.o_cafeteria_kanban .cafeteria_product_image img {
+    display: block;
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    margin: 0 auto;
+}
+
+.o_cafeteria_sale_tax_totals tr:first-child {
+    display: none;
+}
+
