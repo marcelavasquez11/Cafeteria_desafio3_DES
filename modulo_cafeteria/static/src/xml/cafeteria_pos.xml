@@ -160,24 +160,27 @@
                         <t t-esc="state.checkoutSuccess"/>
                     </div>
 
+                    <!-- Resumen: subtotal (sin descuento), descuento por tipo de cliente y total -->
                     <div class="px-3 pt-3">
                         <div class="d-flex justify-content-between py-1">
                             <span>Subtotal</span>
-                            <strong t-esc="this.formatMoney(state.totals.amount_untaxed)"/>
+                            <strong t-esc="this.formatMoney(state.totals.amount_total_normal)"/>
                         </div>
-                        <t t-foreach="state.totals.tax_lines" t-as="taxLine" t-key="taxLine_index">
-                            <div class="d-flex justify-content-between py-1 text-muted">
-                                <span t-esc="taxLine.name"/>
-                                <strong t-esc="this.formatMoney(taxLine.amount)"/>
-                            </div>
-                        </t>
-                        <div t-if="state.totalsLoading" class="form-text">Actualizando impuestos...</div>
+                        <div class="d-flex justify-content-between py-1"
+                             t-att-class="{ 'text-success': state.totals.descuento_monto &gt; 0 }">
+                            <span>Descuento</span>
+                            <strong>
+                                <t t-if="state.totals.descuento_monto &gt; 0">-</t>
+                                <t t-esc="this.formatMoney(state.totals.descuento_monto)"/>
+                            </strong>
+                        </div>
+                        <div t-if="state.totalsLoading" class="form-text">Actualizando total...</div>
                         <div t-if="state.totalsError" class="form-text text-danger">
                             <t t-esc="state.totalsError"/>
                         </div>
                     </div>
                     <div class="o_cafeteria_cart_total">
-                        <span>Total general</span>
+                        <span>Total</span>
                         <strong t-esc="this.formatMoney(state.totals.amount_total)"/>
                     </div>
                     <div class="px-3 pb-3">

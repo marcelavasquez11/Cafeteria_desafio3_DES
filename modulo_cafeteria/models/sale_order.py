@@ -12,6 +12,9 @@ class SaleOrderLine(models.Model):
     def _compute_discount(self):
         super()._compute_discount()
         # Aplica a cada línea el descuento de la categoría del cliente
+        # (con sin_descuento_cliente se calcula el total "normal", sin ese descuento)
+        if self.env.context.get("sin_descuento_cliente"):
+            return
         for line in self:
             descuento = line.order_id.partner_id.descuento_cliente
             if line.product_id and not line.display_type and descuento > line.discount:
@@ -117,6 +120,15 @@ class SaleOrder(models.Model):
             }
         )
         order._compute_amounts()
+
+        # Total normal: el mismo carrito calculado sin el descuento por tipo de cliente
+        orden_normal = self.with_context(sin_descuento_cliente=True).new(
+            {
+                "partner_id": partner.id or False,
+                "order_line": order_lines,
+            }
+        )
+        orden_normal._compute_amounts()
         tax_totals = order.tax_totals or {}
         tax_lines = [
             {
@@ -133,6 +145,14 @@ class SaleOrder(models.Model):
             "amount_untaxed": order.amount_untaxed,
             "amount_tax": order.amount_tax,
             "amount_total": order.amount_total,
+            "amount_total_normal": orden_normal.amount_total,
+            "descuento_monto": orden_normal.amount_total - order.amount_total,
+            "descuento_porcentaje": partner.descuento_cliente,
+            "categoria_cliente": dict(partner._fields["categoria_cliente"].selection).get(
+                partner.categoria_cliente, ""
+            )
+            if partner
+            else "",
             "tax_lines": tax_lines,
         }
 

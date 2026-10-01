@@ -673,3 +673,45 @@
     .o_cafeteria_dashboard { padding: 16px; }
     .o_cafeteria_dashboard_grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+// ---- Tarjeta de stock en la ficha del producto ----
+.o_cafeteria_stock_card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 12px 0 16px;
+    padding: 16px 20px;
+    border: 1px solid #dce3de;
+    border-left: 6px solid #176b52;
+    border-radius: 12px;
+    background: #f4f8f5;
+}
+
+.o_cafeteria_stock_info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.o_cafeteria_stock_label {
+    color: #69766f;
+    font-weight: 600;
+}
+
+.o_cafeteria_stock_qty {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #176b52;
+}
+
+.o_cafeteria_stock_button {
+    padding: 10px 20px;
+    font-weight: 600;
+    background-color: #176b52;
+    border-color: #176b52;
+}
+
+// Etiqueta de estado de stock sin fondo (solo texto de color)
+.o_cafeteria_stock_estado { font-size: 1.1rem; font-weight: 600; }

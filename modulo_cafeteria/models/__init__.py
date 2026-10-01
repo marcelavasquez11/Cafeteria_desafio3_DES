@@ -4,3 +4,4 @@ from . import sale_order
 from . import cliente
 from . import stock_picking
 from . import dashboard
+from . import combo

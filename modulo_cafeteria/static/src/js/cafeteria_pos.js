@@ -21,6 +21,10 @@ class CafeteriaPos extends Component {
                 amount_untaxed: 0,
                 amount_tax: 0,
                 amount_total: 0,
+                amount_total_normal: 0,
+                descuento_monto: 0,
+                descuento_porcentaje: 0,
+                categoria_cliente: "",
                 tax_lines: [],
             },
             totalsLoading: false,
@@ -140,6 +144,10 @@ class CafeteriaPos extends Component {
                 amount_untaxed: 0,
                 amount_tax: 0,
                 amount_total: 0,
+                amount_total_normal: 0,
+                descuento_monto: 0,
+                descuento_porcentaje: 0,
+                categoria_cliente: "",
                 tax_lines: [],
             };
             this.state.totalsLoading = false;

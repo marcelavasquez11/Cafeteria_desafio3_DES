@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- Opciones del combo: el "Extra Price" se reemplaza por un descuento en % -->
+    <record id="view_product_combo_form_cafeteria" model="ir.ui.view">
+        <field name="name">product.combo.form.cafeteria</field>
+        <field name="model">product.combo</field>
+        <field name="inherit_id" ref="product.product_combo_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='extra_price']" position="replace">
+                <field name="descuento"/>
+                <field name="precio_final" widget="monetary" options="{'field_digits': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Lista de combos: ícono de papelera en cada fila para eliminarlo -->
+    <record id="view_product_combo_list_cafeteria" model="ir.ui.view">
+        <field name="name">product.combo.list.cafeteria</field>
+        <field name="model">product.combo</field>
+        <field name="inherit_id" ref="product.product_combo_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='combo_item_count']" position="after">
+                <button name="action_eliminar_combo" type="object" icon="fa-trash"
+                        title="Eliminar combo" class="text-danger"
+                        confirm="¿Eliminar este combo? Esta acción no se puede deshacer."/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Menú para ver y eliminar las elecciones de combo ya guardadas -->
+    <menuitem
+        id="menu_cafeteria_combos"
+        name="Combos"
+        parent="menu_cafeteria_root"
+        action="product.product_combo_action"
+        sequence="12"
+    />
+
+</odoo>

@@ -14,7 +14,7 @@
                 <field name="categ_id"/>
                 <field name="qty_available"/>
                 <field name="image_128"/>
-                <field name="stock_bajo"/>
+                <field name="estado_stock"/>
 
                 <templates>
                     <t t-name="card">
@@ -56,10 +56,14 @@
                                 <field name="qty_available"/>
                             </div>
 
-                            <!-- Alerta de stock bajo -->
-                            <div t-if="record.stock_bajo.raw_value"
+                            <!-- Alerta de stock: bajo (amarillo) o agotado (rojo) -->
+                            <div t-if="record.estado_stock.raw_value == 'bajo'"
                                  style="margin-top: 6px;">
-                                <strong>⚠️ Stock bajo</strong>
+                                <span style="color: #d4a017; font-weight: 600;">⚠️ Stock bajo</span>
+                            </div>
+                            <div t-if="record.estado_stock.raw_value == 'agotado'"
+                                 style="margin-top: 6px;">
+                                <span class="text-danger" style="font-weight: 600;">⛔ Agotado</span>
                             </div>
 
                         </div>
@@ -81,6 +85,7 @@
 
         <!-- Usar nuestra vista Kanban -->
         <field name="view_id" ref="view_product_template_kanban_cafeteria"/>
+        <field name="search_view_id" ref="view_product_template_search_cafeteria"/>
     </record>
 
     <record id="action_cafeteria_pos" model="ir.actions.client">

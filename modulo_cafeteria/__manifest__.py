@@ -18,7 +18,7 @@
     'website': '',
 
     'category': 'Sales',
-    'version': '1.1.5',
+    'version': '1.3.1',
 
     'depends': [
     'base',
@@ -35,6 +35,7 @@
         'views/producto_views.xml',
         'views/cliente_views.xml',
         'views/cafeteria_menu.xml',
+        'views/combo_views.xml',
          "views/product_cafeteria_views.xml",
         'data/impuestos_13.xml',
         'data/productos_seed.xml',

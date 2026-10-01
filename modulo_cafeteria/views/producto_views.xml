@@ -2,17 +2,130 @@
 
 <odoo>
 
-    <record id="view_product_template_form_cafeteria" model="ir.ui.view">
-        <field name="name">product.template.form.cafeteria</field>
+    <!-- Formulario de producto simplificado + tarjeta visual de stock -->
+    <record id="view_product_template_form_simplificado_cafeteria" model="ir.ui.view">
+        <field name="name">product.template.form.simplificado.cafeteria</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
 
         <field name="arch" type="xml">
 
-            <xpath expr="//field[@name='categ_id']" position="after">
-                <field name="stock_minimo"/>
+            <!-- Política de facturación oculta -->
+            <xpath expr="//field[@name='invoice_policy']" position="attributes">
+                <attribute name="invisible">1</attribute>
             </xpath>
 
+            <!-- Servicio: se agrega una descripción -->
+            <xpath expr="//field[@name='invoice_policy']" position="after">
+                <field name="description_sale" string="Descripción"
+                       placeholder="Descripción del servicio"
+                       invisible="type != 'service'"/>
+            </xpath>
+
+            <!-- Combo: el costo también se muestra, y precio y costo se calculan solos -->
+            <xpath expr="//label[@id='standard_price_label']" position="attributes">
+                <attribute name="invisible">not is_product_variant and (product_variant_count &gt; 1 or (product_variant_count == 0 and is_dynamically_created))</attribute>
+            </xpath>
+            <xpath expr="//div[@name='standard_price_uom']" position="attributes">
+                <attribute name="invisible">not is_product_variant and (product_variant_count &gt; 1 or (product_variant_count == 0 and is_dynamically_created))</attribute>
+            </xpath>
+            <xpath expr="//field[@name='list_price']" position="attributes">
+                <attribute name="readonly">type == 'combo'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="readonly">type == 'combo'</attribute>
+            </xpath>
+
+            <!-- Track Inventory oculto -->
+            <xpath expr="//label[@for='is_storable']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//div[field[@name='is_storable']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Código de barras oculto -->
+            <xpath expr="//field[@name='barcode']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Pestañas Sales e Inventory ocultas -->
+            <xpath expr="//page[@name='sales']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//page[@name='inventory']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- La cantidad "On Hand" de siempre se reemplaza por la tarjeta de abajo -->
+            <xpath expr="//label[@for='qty_available']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('o_row')][.//field[@name='qty_available']]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Tarjeta de stock: cantidad, estado y botón para recargar inventario -->
+            <xpath expr="//div[@name='options']" position="after">
+                <div class="o_cafeteria_stock_card" invisible="not id">
+                    <div class="o_cafeteria_stock_info">
+                        <span class="o_cafeteria_stock_label">Stock disponible</span>
+                        <!-- Goods: se escribe la cantidad directo; al guardar se ajusta el inventario -->
+                        <field name="qty_available" class="o_cafeteria_stock_qty"
+                               invisible="type != 'consu'"
+                               readonly="show_qty_update_button"
+                               options="{'digits': [16, 0]}"/>
+                        <!-- Combo y servicio: el stock se escribe a mano -->
+                        <field name="stock_actual" class="o_cafeteria_stock_qty"
+                               invisible="type == 'consu'"
+                               options="{'digits': [16, 0]}"/>
+                        <!-- Alerta sin fondo: solo texto de color -->
+                        <field name="estado_stock" readonly="1" class="o_cafeteria_stock_estado"
+                               decoration-success="estado_stock == 'disponible'"
+                               decoration-warning="estado_stock == 'bajo'"
+                               decoration-danger="estado_stock == 'agotado'"/>
+                    </div>
+                    <button name="action_open_quants" type="object"
+                            string="Recargar inventario" icon="fa-plus-circle"
+                            class="btn btn-primary o_cafeteria_stock_button"
+                            invisible="type != 'consu' or not show_qty_update_button"/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Lista de inventario: se agrega el estado del stock como etiqueta de color -->
+    <record id="view_product_template_list_cafeteria" model="ir.ui.view">
+        <field name="name">product.template.list.cafeteria</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="estado_stock" readonly="1"
+                       decoration-success="estado_stock == 'disponible'"
+                       decoration-warning="estado_stock == 'bajo'"
+                       decoration-danger="estado_stock == 'agotado'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Búsqueda del inventario: filtros rápidos de stock bajo y agotado -->
+    <record id="view_product_template_search_cafeteria" model="ir.ui.view">
+        <field name="name">product.template.search.cafeteria</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Producto"/>
+                <field name="categ_id"/>
+                <filter name="filtro_stock_bajo" string="Stock bajo"
+                        domain="[('estado_stock', '=', 'bajo')]"/>
+                <filter name="filtro_agotado" string="Agotados"
+                        domain="[('estado_stock', '=', 'agotado')]"/>
+                <separator/>
+                <filter name="filtro_disponible" string="Disponibles"
+                        domain="[('estado_stock', '=', 'disponible')]"/>
+            </search>
         </field>
     </record>
 
