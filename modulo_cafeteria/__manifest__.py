@@ -18,7 +18,7 @@
     'website': '',
 
     'category': 'Sales',
-    'version': '1.0.9',
+    'version': '1.1.5',
 
     'depends': [
     'base',
@@ -50,6 +50,8 @@
             'modulo_cafeteria/static/src/xml/cafeteria_pos.xml',
             'modulo_cafeteria/static/src/js/cafeteria_pos.js',
             'modulo_cafeteria/static/src/js/masked_char_field.js',
+            'modulo_cafeteria/static/src/xml/cafeteria_dashboard.xml',
+            'modulo_cafeteria/static/src/js/cafeteria_dashboard.js',
         ],
     },
 

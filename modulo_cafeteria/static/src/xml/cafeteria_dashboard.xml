@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="modulo_cafeteria.CafeteriaDashboard">
+        <main class="o_cafeteria_dashboard">
+            <header class="o_cafeteria_dashboard_header">
+                <div>
+                    <p class="o_cafeteria_dashboard_eyebrow">CAFETERÍA</p>
+                    <h1>Dashboard</h1>
+                </div>
+                <span class="o_cafeteria_dashboard_date">
+                    <i class="fa fa-calendar-o me-1" aria-hidden="true"/><t t-esc="fechaHoy"/>
+                </span>
+            </header>
+
+            <div t-if="state.error" class="alert alert-danger">No se pudo cargar el dashboard.</div>
+
+            <t t-else="">
+                <!-- Cards de resumen -->
+                <section class="o_cafeteria_dashboard_cards">
+                    <article class="o_cafeteria_dashboard_card is-blue">
+                        <span class="o_cafeteria_dashboard_icon"><i class="fa fa-cubes" aria-hidden="true"/></span>
+                        <div>
+                            <span class="o_cafeteria_dashboard_label">Total de productos</span>
+                            <strong t-esc="state.datos.total_productos"/>
+                            <small>con stock o sin stock</small>
+                        </div>
+                    </article>
+                    <article class="o_cafeteria_dashboard_card is-green">
+                        <span class="o_cafeteria_dashboard_icon"><i class="fa fa-check-circle" aria-hidden="true"/></span>
+                        <div>
+                            <span class="o_cafeteria_dashboard_label">Productos en stock</span>
+                            <strong t-esc="state.datos.productos_en_stock"/>
+                            <small>productos distintos con existencias</small>
+                        </div>
+                    </article>
+                    <article class="o_cafeteria_dashboard_card is-amber">
+                        <span class="o_cafeteria_dashboard_icon"><i class="fa fa-usd" aria-hidden="true"/></span>
+                        <div>
+                            <span class="o_cafeteria_dashboard_label">Venta del día</span>
+                            <strong t-esc="formatMoney(state.datos.ventas_hoy.monto)"/>
+                            <small><t t-esc="state.datos.ventas_hoy.cantidad"/> ventas hoy</small>
+                        </div>
+                    </article>
+                    <article class="o_cafeteria_dashboard_card is-purple">
+                        <span class="o_cafeteria_dashboard_icon"><i class="fa fa-line-chart" aria-hidden="true"/></span>
+                        <div>
+                            <span class="o_cafeteria_dashboard_label">Ventas del mes</span>
+                            <strong t-esc="formatMoney(state.datos.ventas_mes.monto)"/>
+                            <small><t t-esc="state.datos.ventas_mes.cantidad"/> ventas en el mes</small>
+                        </div>
+                    </article>
+                </section>
+
+                <div class="o_cafeteria_dashboard_grid">
+                    <!-- Gráfico de ventas de la semana -->
+                    <section class="o_cafeteria_dashboard_panel">
+                        <h2><i class="fa fa-area-chart me-2" aria-hidden="true"/>Ventas de la semana</h2>
+                        <div class="o_cafeteria_dashboard_chart">
+                            <canvas t-ref="chart"/>
+                        </div>
+                    </section>
+
+                    <!-- Top de productos más vendidos del mes -->
+                    <section class="o_cafeteria_dashboard_panel">
+                        <h2><i class="fa fa-trophy me-2" aria-hidden="true"/>Más vendidos del mes</h2>
+                        <p t-if="!state.datos.top_productos.length" class="o_cafeteria_dashboard_empty">
+                            Aún no hay ventas este mes.
+                        </p>
+                        <ol t-else="" class="o_cafeteria_dashboard_top">
+                            <li t-foreach="state.datos.top_productos" t-as="item" t-key="item.id"
+                                class="o_cafeteria_dashboard_row" t-on-click="() => this.abrirProducto(item.id)">
+                                <span class="o_cafeteria_dashboard_rank" t-esc="item_index + 1"/>
+                                <div class="o_cafeteria_dashboard_top_info">
+                                    <div class="o_cafeteria_dashboard_top_line">
+                                        <span t-esc="item.nombre"/>
+                                        <strong><t t-esc="formatNumber(item.cantidad)"/> unidades</strong>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </section>
+                </div>
+
+                <!-- Alertas de stock, separadas por pestaña -->
+                <section class="o_cafeteria_dashboard_panel">
+                    <div class="o_cafeteria_dashboard_alert_head">
+                        <h2><i class="fa fa-bell me-2" aria-hidden="true"/>Alertas de stock</h2>
+                        <div class="o_cafeteria_dashboard_tabs">
+                            <button type="button" class="is-amber"
+                                    t-att-class="{ 'active': state.tabAlertas === 'minimo' }"
+                                    t-on-click="() => state.tabAlertas = 'minimo'">
+                                <i class="fa fa-exclamation-triangle me-1" aria-hidden="true"/>
+                                Stock bajo
+                                <span t-esc="state.datos.alertas.minimo.length"/>
+                            </button>
+                            <button type="button" class="is-red"
+                                    t-att-class="{ 'active': state.tabAlertas === 'agotados' }"
+                                    t-on-click="() => state.tabAlertas = 'agotados'">
+                                <i class="fa fa-ban me-1" aria-hidden="true"/>
+                                Agotados
+                                <span t-esc="state.datos.alertas.agotados.length"/>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p t-if="!alertas.length" class="o_cafeteria_dashboard_empty">
+                        <i class="fa fa-check-circle text-success me-1" aria-hidden="true"/>
+                        No hay productos en esta alerta.
+                    </p>
+                    <div t-else="" class="o_cafeteria_dashboard_alerts">
+                        <article t-foreach="alertas" t-as="item" t-key="item.id"
+                                 class="o_cafeteria_dashboard_alert o_cafeteria_dashboard_row"
+                                 t-att-class="state.tabAlertas === 'agotados' ? 'is-red' : 'is-amber'"
+                                 t-on-click="() => this.abrirProducto(item.id)">
+                            <span class="o_cafeteria_dashboard_alert_icon">
+                                <i t-att-class="state.tabAlertas === 'agotados' ? 'fa fa-ban' : 'fa fa-exclamation-triangle'" aria-hidden="true"/>
+                            </span>
+                            <div class="o_cafeteria_dashboard_alert_info">
+                                <strong t-esc="item.nombre"/>
+                                <span>
+                                    <t t-if="state.tabAlertas === 'agotados'">Sin existencias</t>
+                                    <t t-else="">Quedan <t t-esc="formatNumber(item.stock)"/></t>
+                                    · mínimo <t t-esc="formatNumber(item.minimo)"/>
+                                </span>
+                                <div class="o_cafeteria_dashboard_bar">
+                                    <div t-att-style="'width:' + porcentajeStock(item) + '%'"/>
+                                </div>
+                            </div>
+                            <i class="fa fa-angle-right o_cafeteria_dashboard_alert_go" aria-hidden="true"/>
+                        </article>
+                    </div>
+                </section>
+            </t>
+        </main>
+    </t>
+</templates>

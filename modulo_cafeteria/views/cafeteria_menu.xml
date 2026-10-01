@@ -89,6 +89,13 @@
     </record>
 
 
+    <!-- Pantalla de inicio (dashboard) -->
+    <record id="action_cafeteria_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">modulo_cafeteria.cafeteria_dashboard</field>
+    </record>
+
+
     <!-- Menú principal -->
     <menuitem
         id="menu_cafeteria_root"
@@ -96,6 +103,15 @@
         sequence="10"
     />
 
+
+    <!-- Primer submenú: al entrar a Cafetería se abre el dashboard -->
+    <menuitem
+        id="menu_cafeteria_dashboard"
+        name="Dashboard"
+        parent="menu_cafeteria_root"
+        action="action_cafeteria_dashboard"
+        sequence="1"
+    />
 
     <!-- Submenú Productos -->
     <menuitem

@@ -392,3 +392,284 @@
 .badge.o_badge_color_101 { background-color: #bfe6f7; color: #0b4a6b; } // regular: celeste
 .badge.o_badge_color_102 { background-color: #c8f0c8; color: #1d5c1d; } // frecuente: verde claro
 .badge.o_badge_color_103 { background-color: #dccbf2; color: #4b2a7a; } // corporativo: lila
+
+// ---- Dashboard de inicio ----
+.o_web_client > .o_action_manager:has(> .o_cafeteria_dashboard) {
+    overflow-y: auto;
+}
+
+.o_cafeteria_dashboard {
+    --cafeteria-ink: #24332d;
+    --cafeteria-muted: #69766f;
+    --cafeteria-line: #e3e9e5;
+    --cafeteria-paper: #f4f6f2;
+    --tono-blue: #2f6fb3;   --tono-blue-bg: #e4eefa;
+    --tono-green: #176b52;  --tono-green-bg: #dff3ea;
+    --tono-amber: #b7791f;  --tono-amber-bg: #fdf1d8;
+    --tono-purple: #6d4bb0; --tono-purple-bg: #ece6f8;
+    --tono-red: #c0392b;    --tono-red-bg: #fbe4e1;
+    min-height: 100%;
+    padding: 28px;
+    color: var(--cafeteria-ink);
+    background: var(--cafeteria-paper);
+
+    h1 { margin: 0; font-size: 1.9rem; font-weight: 700; }
+    h2 { margin: 0 0 16px; font-size: 1.05rem; font-weight: 700; }
+}
+
+.o_cafeteria_dashboard_header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.o_cafeteria_dashboard_eyebrow {
+    margin: 0 0 4px;
+    color: var(--tono-green);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.o_cafeteria_dashboard_date {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--cafeteria-line);
+    color: var(--cafeteria-muted);
+    font-size: 0.85rem;
+    text-transform: capitalize;
+}
+
+// Colores por tono (cards, alertas, pestañas)
+.is-blue   { --tono: var(--tono-blue);   --tono-bg: var(--tono-blue-bg); }
+.is-green  { --tono: var(--tono-green);  --tono-bg: var(--tono-green-bg); }
+.is-amber  { --tono: var(--tono-amber);  --tono-bg: var(--tono-amber-bg); }
+.is-purple { --tono: var(--tono-purple); --tono-bg: var(--tono-purple-bg); }
+.is-red    { --tono: var(--tono-red);    --tono-bg: var(--tono-red-bg); }
+
+.o_cafeteria_dashboard_cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.o_cafeteria_dashboard_card,
+.o_cafeteria_dashboard_panel {
+    background: #fff;
+    border: 1px solid var(--cafeteria-line);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(36, 51, 45, 0.06);
+}
+
+.o_cafeteria_dashboard_panel {
+    padding: 20px;
+}
+
+.o_cafeteria_dashboard_card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    transition: transform 0.15s, box-shadow 0.15s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(36, 51, 45, 0.1);
+    }
+
+    > div { display: flex; flex-direction: column; min-width: 0; }
+
+    .o_cafeteria_dashboard_label { color: var(--cafeteria-muted); font-size: 0.85rem; font-weight: 600; }
+    strong { font-size: 1.8rem; line-height: 1.2; }
+    small { color: var(--cafeteria-muted); }
+}
+
+.o_cafeteria_dashboard_icon {
+    display: flex;
+    flex: 0 0 52px;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--tono-bg);
+    color: var(--tono);
+    font-size: 1.5rem;
+}
+
+.o_cafeteria_dashboard_grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.o_cafeteria_dashboard_chart {
+    position: relative;
+    height: 280px;
+}
+
+.o_cafeteria_dashboard_empty {
+    margin: 12px 0 0;
+    color: var(--cafeteria-muted);
+}
+
+// Barra de progreso (top de ventas y stock de alertas)
+.o_cafeteria_dashboard_bar {
+    height: 6px;
+    margin-top: 6px;
+    border-radius: 999px;
+    background: var(--cafeteria-line);
+    overflow: hidden;
+
+    > div {
+        height: 100%;
+        border-radius: 999px;
+        background: var(--tono, var(--tono-green));
+    }
+}
+
+.o_cafeteria_dashboard_row {
+    cursor: pointer;
+}
+
+// Top de productos más vendidos
+.o_cafeteria_dashboard_top {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border-radius: 10px;
+        transition: background 0.15s;
+
+        &:hover { background: var(--cafeteria-paper); }
+    }
+}
+
+.o_cafeteria_dashboard_rank {
+    display: flex;
+    flex: 0 0 28px;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--tono-green-bg);
+    color: var(--tono-green);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.o_cafeteria_dashboard_top_info { flex: 1; min-width: 0; }
+
+.o_cafeteria_dashboard_top_line {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+
+    strong { white-space: nowrap; color: var(--tono-green); }
+}
+
+// Alertas de stock
+.o_cafeteria_dashboard_alert_head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    h2 { margin-bottom: 16px; }
+}
+
+.o_cafeteria_dashboard_tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    button {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 14px;
+        border: 1px solid var(--cafeteria-line);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--cafeteria-ink);
+        font-weight: 600;
+
+        span {
+            margin-left: 8px;
+            padding: 1px 8px;
+            border-radius: 999px;
+            background: var(--tono-bg);
+            color: var(--tono);
+            font-size: 0.8rem;
+        }
+
+        &.active {
+            background: var(--tono);
+            border-color: var(--tono);
+            color: #fff;
+
+            span { background: rgba(255, 255, 255, 0.25); color: #fff; }
+        }
+    }
+}
+
+.o_cafeteria_dashboard_alerts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.o_cafeteria_dashboard_alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--tono-bg);
+    border-left: 5px solid var(--tono);
+    border-radius: 10px;
+    background: var(--tono-bg);
+    transition: transform 0.15s, box-shadow 0.15s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(36, 51, 45, 0.12);
+    }
+}
+
+.o_cafeteria_dashboard_alert_icon {
+    display: flex;
+    flex: 0 0 38px;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--tono);
+}
+
+.o_cafeteria_dashboard_alert_info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+
+    > span { color: var(--cafeteria-muted); font-size: 0.85rem; }
+}
+
+.o_cafeteria_dashboard_alert_go { color: var(--tono); font-size: 1.4rem; }
+
+@media (max-width: 900px) {
+    .o_cafeteria_dashboard { padding: 16px; }
+    .o_cafeteria_dashboard_grid { grid-template-columns: minmax(0, 1fr); }
+}
