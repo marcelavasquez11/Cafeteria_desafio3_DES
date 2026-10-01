@@ -28,4 +28,38 @@
         </field>
     </record>
 
+    <!-- Lista de ventas: se ocultan las columnas Vendedor y Actividades -->
+    <record id="view_sale_order_list_cafeteria" model="ir.ui.view">
+        <field name="name">sale.order.list.cafeteria</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="optional"/>
+            </xpath>
+            <xpath expr="//field[@name='activity_ids']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="optional"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Lo mismo para la lista de cotizaciones -->
+    <record id="view_quotation_list_cafeteria" model="ir.ui.view">
+        <field name="name">sale.order.quotation.list.cafeteria</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="optional"/>
+            </xpath>
+            <xpath expr="//field[@name='activity_ids']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="optional"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

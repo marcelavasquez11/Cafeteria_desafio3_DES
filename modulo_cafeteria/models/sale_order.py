@@ -1,11 +1,65 @@
 import math
 
-from odoo import _, api, models
-from odoo.exceptions import UserError
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError, ValidationError
+
+
+class SaleOrderLine(models.Model):
+    _inherit = "sale.order.line"
+
+    # Se vuelve a calcular el descuento cuando cambia el cliente de la venta
+    @api.depends("order_id.partner_id")
+    def _compute_discount(self):
+        super()._compute_discount()
+        # Aplica a cada línea el descuento de la categoría del cliente
+        for line in self:
+            descuento = line.order_id.partner_id.descuento_cliente
+            if line.product_id and not line.display_type and descuento > line.discount:
+                line.discount = descuento
+
+
+    # No se puede vender más de lo que hay en stock (solo mientras la venta no está confirmada,
+    # porque al confirmar el stock ya se descuenta)
+    @api.constrains("product_id", "product_uom_id", "product_uom_qty")
+    def _check_stock_suficiente(self):
+        for orden in self.order_id.filtered(lambda o: o.state in ("draft", "sent")):
+            # Se suma la cantidad pedida de cada producto en toda la venta
+            pedido = {}
+            for line in orden.order_line.filtered(
+                lambda l: l.product_id.is_storable and not l.display_type
+            ):
+                producto = line.product_id
+                pedido[producto] = pedido.get(producto, 0.0) + line.product_uom_id._compute_quantity(
+                    line.product_uom_qty, producto.uom_id
+                )
+            for producto, cantidad in pedido.items():
+                if cantidad > producto.qty_available:
+                    raise ValidationError(
+                        _("Stock insuficiente de '%(producto)s': disponible %(stock)g, solicitado %(cantidad)g.")
+                        % {
+                            "producto": producto.display_name,
+                            "stock": producto.qty_available,
+                            "cantidad": cantidad,
+                        }
+                    )
 
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
+
+    # Resumen de productos de la venta, para mostrarlo en el historial del cliente
+    productos_resumen = fields.Char(
+        string="Productos",
+        compute="_compute_productos_resumen",
+    )
+
+    @api.depends("order_line.product_id", "order_line.product_uom_qty")
+    def _compute_productos_resumen(self):
+        for orden in self:
+            lineas = orden.order_line.filtered(lambda l: not l.display_type)
+            orden.productos_resumen = ", ".join(
+                "%s x%g" % (l.product_id.name, l.product_uom_qty) for l in lineas
+            )
 
     @api.model
     def _prepare_pos_order_data(self, partner_id, lines, require_partner=True):
@@ -114,5 +168,8 @@ class SaleOrder(models.Model):
 
             if picking.state == "assigned":
                 picking.button_validate()
+
+        # Al confirmar, el cliente puede subir de regular a frecuente
+        self.partner_id.actualizar_categoria_por_compras()
 
         return result

@@ -146,6 +146,9 @@
                                         <i class="fa fa-trash" aria-hidden="true"/>
                                     </button>
                                 </div>
+                                <div t-if="line.stockWarning" class="text-danger small w-100 mt-1" role="alert">
+                                    Stock insuficiente (disponible: <t t-esc="this.formatStock(line.product.qty_available)"/>)
+                                </div>
                             </article>
                         </t>
                     </div>

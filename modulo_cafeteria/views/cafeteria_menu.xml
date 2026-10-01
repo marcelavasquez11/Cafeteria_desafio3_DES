@@ -118,7 +118,7 @@
         id="menu_cafeteria_clientes"
         name="Clientes"
         parent="menu_cafeteria_root"
-        action="base.action_partner_form"
+        action="action_clientes_cafeteria"
         sequence="15"
     />
 

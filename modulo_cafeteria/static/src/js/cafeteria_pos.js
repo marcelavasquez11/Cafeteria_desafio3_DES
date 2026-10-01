@@ -90,10 +90,10 @@ class CafeteriaPos extends Component {
     addProduct(product) {
         const line = this.state.cart.find((item) => item.product.id === product.id);
         if (line) {
-            line.quantity++;
-        } else {
-            this.state.cart.push({ product, quantity: 1 });
+            this.changeQuantity(product.id, 1);
+            return;
         }
+        this.state.cart.push({ product, quantity: 1, stockWarning: false });
         this.refreshTotals();
     }
 
@@ -106,6 +106,12 @@ class CafeteriaPos extends Component {
             this.removeProduct(productId);
             return;
         }
+        // No se permite superar el stock disponible: se muestra "Stock insuficiente"
+        if (line.quantity + amount > line.product.qty_available) {
+            line.stockWarning = true;
+            return;
+        }
+        line.stockWarning = false;
         line.quantity += amount;
         this.refreshTotals();
     }

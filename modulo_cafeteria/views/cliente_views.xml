@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- Lista de clientes: solo nombre, categoría y total acumulado -->
+    <record id="view_cliente_cafeteria_list" model="ir.ui.view">
+        <field name="name">res.partner.list.cafeteria</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="categoria_cliente" widget="badge" options="{'color_field': 'color_categoria'}"/>
+                <field name="color_categoria" column_invisible="1"/>
+                <field name="total_compras" widget="monetary"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Formulario de cliente propio (no hereda del de Odoo): solo el nombre es obligatorio -->
+    <record id="view_cliente_cafeteria_form" model="ir.ui.view">
+        <field name="name">res.partner.form.cafeteria</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form string="Cliente">
+                <sheet>
+
+                    <h1>
+                        <field name="name" placeholder="Nombre del cliente" required="1"/>
+                    </h1>
+
+                    <group>
+                        <group string="Datos del cliente">
+                            <field name="email" widget="email" placeholder="nombre@correo.com"/>
+                            <field name="phone" widget="masked_char" options="{'mask': '0000-0000'}" placeholder="0000-0000"/>
+                            <field name="dui" widget="masked_char" options="{'mask': '00000000-0'}" placeholder="00000000-0"/>
+                            <!-- Dirección en una sola línea -->
+                            <field name="street" string="Dirección" placeholder="Dirección completa"/>
+                        </group>
+                        <group string="Información de cafetería">
+                            <field name="fecha_registro"/>
+                            <!-- Lista desplegable de categoría + etiqueta de color -->
+                            <field name="categoria_cliente"/>
+                            <field id="categoria_etiqueta" name="categoria_cliente" string="Etiqueta" widget="badge"
+                                   options="{'color_field': 'color_categoria'}" readonly="1"/>
+                            <field name="descuento_cliente"/>
+                            <field name="total_compras" widget="monetary"/>
+                            <field name="color_categoria" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Historial de compras: fecha, productos y monto total -->
+                        <page string="Historial de compras" name="historial_compras">
+                            <field name="compra_ids" readonly="1">
+                                <list>
+                                    <field name="date_order" string="Fecha de compra"/>
+                                    <field name="name" string="Venta"/>
+                                    <field name="productos_resumen"/>
+                                    <field name="amount_total" string="Monto total" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Notas" name="notas">
+                            <field name="comment" placeholder="Notas internas..."/>
+                        </page>
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Búsqueda de clientes: panel lateral para filtrar directo por categoría -->
+    <record id="view_cliente_cafeteria_search" model="ir.ui.view">
+        <field name="name">res.partner.search.cafeteria</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Cliente" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <searchpanel>
+                    <field name="categoria_cliente" string="Categoría" select="one" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción del menú Clientes: usa las vistas anteriores -->
+    <record id="action_clientes_cafeteria" model="ir.actions.act_window">
+        <field name="name">Clientes</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_cliente_cafeteria_search"/>
+    </record>
+
+    <record id="action_clientes_cafeteria_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_cliente_cafeteria_list"/>
+        <field name="act_window_id" ref="action_clientes_cafeteria"/>
+    </record>
+
+    <record id="action_clientes_cafeteria_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_cliente_cafeteria_form"/>
+        <field name="act_window_id" ref="action_clientes_cafeteria"/>
+    </record>
+
+</odoo>

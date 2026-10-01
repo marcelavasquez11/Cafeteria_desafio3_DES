@@ -18,7 +18,7 @@
     'website': '',
 
     'category': 'Sales',
-    'version': '1.0.2',
+    'version': '1.0.9',
 
     'depends': [
     'base',
@@ -33,7 +33,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/producto_views.xml',
-         'views/cafeteria_menu.xml',
+        'views/cliente_views.xml',
+        'views/cafeteria_menu.xml',
          "views/product_cafeteria_views.xml",
         'data/impuestos_13.xml',
         'data/productos_seed.xml',
@@ -48,6 +49,7 @@
             'modulo_cafeteria/static/src/scss/cafeteria.scss',
             'modulo_cafeteria/static/src/xml/cafeteria_pos.xml',
             'modulo_cafeteria/static/src/js/cafeteria_pos.js',
+            'modulo_cafeteria/static/src/js/masked_char_field.js',
         ],
     },
 
