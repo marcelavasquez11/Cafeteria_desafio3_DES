@@ -18,7 +18,7 @@
     'website': '',
 
     'category': 'Sales',
-    'version': '1.0.0',
+    'version': '1.0.2',
 
     'depends': [
     'base',
@@ -35,14 +35,19 @@
         'views/producto_views.xml',
          'views/cafeteria_menu.xml',
          "views/product_cafeteria_views.xml",
+        'data/impuestos_13.xml',
         'data/productos_seed.xml',
         "views/sale_order_views.xml",
         'views/account_move_cafeteria_views.xml',
+        'reports/factura_cafeteria_template.xml',
+        'reports/factura_cafeteria_report.xml',
     ],
 
     'assets': {
-        'web.assets_web': [
+        'web.assets_backend': [
             'modulo_cafeteria/static/src/scss/cafeteria.scss',
+            'modulo_cafeteria/static/src/xml/cafeteria_pos.xml',
+            'modulo_cafeteria/static/src/js/cafeteria_pos.js',
         ],
     },
 

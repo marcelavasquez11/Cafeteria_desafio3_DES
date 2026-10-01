@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="factura_cafeteria_report">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="web.basic_layout">
+                <t t-call="modulo_cafeteria.factura_cafeteria_document"
+                   t-lang="o.partner_id.lang or 'en_US'"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="factura_cafeteria_document">
+        <t t-set="company_partner" t-value="o.company_id.partner_id"/>
+        <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
+        <style type="text/css">
+            .cafeteria-invoice { color: #24332d; font-family: "DejaVu Sans", sans-serif; font-size: 10px; }
+            .cafeteria-invoice h1, .cafeteria-invoice h2, .cafeteria-invoice h3 { margin: 0; }
+            .cafeteria-invoice .brand { color: #176b52; font-size: 25px; font-weight: 700; }
+            .cafeteria-invoice .document-title { color: #176b52; font-size: 17px; font-weight: 700; text-align: right; }
+            .cafeteria-invoice .document-subtitle { color: #69766f; font-size: 9px; text-align: right; }
+            .cafeteria-invoice .invoice-number { font-size: 12px; font-weight: 700; }
+            .cafeteria-invoice .header-table, .cafeteria-invoice .parties-table, .cafeteria-invoice .lines-table, .cafeteria-invoice .summary-table { border-collapse: collapse; width: 100%; }
+            .cafeteria-invoice .header-table td { padding: 0 0 10px; vertical-align: top; }
+            .cafeteria-invoice .metadata { border-bottom: 2px solid #176b52; margin-bottom: 12px; padding: 8px 0; }
+            .cafeteria-invoice .metadata td { padding: 3px 8px 3px 0; }
+            .cafeteria-invoice .section-title { background: #e8efeb; border-left: 3px solid #176b52; font-size: 10px; font-weight: 700; margin: 9px 0 5px; padding: 5px 7px; }
+            .cafeteria-invoice .parties-table { margin-bottom: 8px; }
+            .cafeteria-invoice .parties-table td { border: 1px solid #dce3de; padding: 7px; vertical-align: top; width: 50%; }
+            .cafeteria-invoice .party-name { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+            .cafeteria-invoice .muted { color: #69766f; }
+            .cafeteria-invoice .lines-table { font-size: 8px; }
+            .cafeteria-invoice .lines-table thead { display: table-header-group; }
+            .cafeteria-invoice .lines-table th { background: #176b52; color: #fff; padding: 6px 4px; text-align: left; }
+            .cafeteria-invoice .lines-table td { border-bottom: 1px solid #dce3de; padding: 6px 4px; vertical-align: top; }
+            .cafeteria-invoice .lines-table tr { page-break-inside: avoid; break-inside: avoid; }
+            .cafeteria-invoice .number { text-align: right !important; white-space: nowrap; }
+            .cafeteria-invoice .summary-wrap { margin-top: 10px; page-break-inside: avoid; break-inside: avoid; }
+            .cafeteria-invoice .summary-table { margin-left: auto; width: 48%; }
+            .cafeteria-invoice .summary-table td { padding: 4px 6px; text-align: right; }
+            .cafeteria-invoice .summary-table td:first-child { text-align: left; }
+            .cafeteria-invoice .summary-table .grand-total td { border-top: 2px solid #176b52; color: #176b52; font-size: 13px; font-weight: 700; padding-top: 7px; }
+            .cafeteria-invoice .details-grid { border-top: 1px solid #dce3de; margin-top: 12px; padding-top: 8px; }
+            .cafeteria-invoice .details-grid td { padding: 3px 12px 3px 0; vertical-align: top; }
+            .cafeteria-invoice .words, .cafeteria-invoice .observations { margin-top: 10px; }
+            .cafeteria-invoice .words-content, .cafeteria-invoice .observations-content { border: 1px solid #dce3de; min-height: 22px; padding: 6px; }
+            .cafeteria-invoice .legal-footer { border-top: 1px solid #dce3de; bottom: -12mm; color: #69766f; font-size: 8px; left: 0; padding-top: 4px; position: fixed; right: 0; text-align: center; }
+        </style>
+
+        <div class="page cafeteria-invoice">
+            <table class="header-table">
+                <tr>
+                    <td style="width: 55%;">
+                        <div class="brand">CAFETERÍA</div>
+                        <div class="muted">Factura de venta</div>
+                    </td>
+                    <td style="width: 45%;">
+                        <div class="document-title">FACTURA</div>
+                        <div class="document-subtitle">DOCUMENTO TRIBUTARIO ELECTRÓNICO</div>
+                        <div class="document-subtitle">Representación gráfica</div>
+                    </td>
+                </tr>
+            </table>
+
+            <table class="metadata">
+                <tr>
+                    <td><strong>Número:</strong> <span class="invoice-number" t-field="o.name"/></td>
+                    <td><strong>Fecha de emisión:</strong>
+                        <span t-if="o.invoice_date" t-field="o.invoice_date"/>
+                        <span t-else="" t-field="o.date"/>
+                    </td>
+                    <td><strong>Estado:</strong>
+                        <t t-if="o.state == 'posted'">Publicada</t>
+                        <t t-elif="o.state == 'cancel'">Anulada</t>
+                        <t t-else="">Borrador</t>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="section-title">EMISOR</div>
+            <table class="parties-table">
+                <tr>
+                    <td colspan="2" style="width: 100%;">
+                        <div class="party-name">CAFETERÍA</div>
+                        <div><strong>Dirección:</strong> El Salvador, San Salvador</div>
+                        <div><strong>Teléfono:</strong> 2298-2000</div>
+                        <div t-if="company_partner.vat"><strong>NIT:</strong> <span t-field="company_partner.vat"/></div>
+                        <div t-if="company_partner.company_registry"><strong>NRC:</strong> <span t-field="company_partner.company_registry"/></div>
+                        <div t-if="company_partner.email"><strong>Correo:</strong> <span t-field="company_partner.email"/></div>
+                        <div t-if="company_partner.industry_id"><strong>Actividad económica:</strong> <span t-field="company_partner.industry_id.name"/></div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="section-title">RECEPTOR</div>
+            <table class="parties-table">
+                <tr>
+                    <td>
+                        <div class="party-name" t-field="o.partner_id.name"/>
+                        <div t-if="o.partner_id.vat"><strong>NIT:</strong> <span t-field="o.partner_id.vat"/></div>
+                        <div t-if="o.partner_id.company_registry"><strong>NRC:</strong> <span t-field="o.partner_id.company_registry"/></div>
+                        <div t-if="o.partner_id.street or o.partner_id.street2 or o.partner_id.city or o.partner_id.state_id or o.partner_id.zip or o.partner_id.country_id">
+                            <strong>Dirección:</strong>
+                            <span t-if="o.partner_id.street" t-field="o.partner_id.street"/>
+                            <span t-if="o.partner_id.street2">, <span t-field="o.partner_id.street2"/></span>
+                            <span t-if="o.partner_id.city">, <span t-field="o.partner_id.city"/></span>
+                            <span t-if="o.partner_id.state_id">, <span t-field="o.partner_id.state_id.name"/></span>
+                            <span t-if="o.partner_id.zip">, <span t-field="o.partner_id.zip"/></span>
+                            <span t-if="o.partner_id.country_id">, <span t-field="o.partner_id.country_id.name"/></span>
+                        </div>
+                        <div t-if="o.partner_id.phone"><strong>Teléfono:</strong> <span t-field="o.partner_id.phone"/></div>
+                        <div t-if="o.partner_id.email"><strong>Correo:</strong> <span t-field="o.partner_id.email"/></div>
+                    </td>
+                    <td>
+                        <div class="party-name">Datos de facturación</div>
+                        <div t-if="o.invoice_date_due"><strong>Fecha de vencimiento:</strong> <span t-field="o.invoice_date_due"/></div>
+                        <div t-if="o.invoice_origin"><strong>Documento relacionado:</strong> <span t-field="o.invoice_origin"/></div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="section-title">DETALLE DE PRODUCTOS</div>
+            <table class="lines-table">
+                <thead>
+                    <tr>
+                        <th style="width: 4%;">N°</th>
+                        <th class="number" style="width: 8%;">Cantidad</th>
+                        <th style="width: 8%;">Unidad</th>
+                        <th style="width: 31%;">Descripción</th>
+                        <th class="number" style="width: 13%;">Precio unitario</th>
+                        <th class="number" style="width: 9%;">Descuento</th>
+                        <th style="width: 12%;">Impuesto</th>
+                        <th class="number" style="width: 15%;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="o.invoice_line_ids.filtered(lambda line: line.display_type == 'product')" t-as="line">
+                        <tr>
+                            <td t-esc="line_index + 1"/>
+                            <td class="number"><span t-field="line.quantity"/></td>
+                            <td><span t-field="line.product_uom_id.name"/></td>
+                            <td><span t-field="line.name"/></td>
+                            <td class="number"><span t-field="line.price_unit"/></td>
+                            <td class="number">
+                                <t t-if="line.discount"><span t-field="line.discount"/>%</t>
+                                <t t-else="">-</t>
+                            </td>
+                            <td>
+                                <t t-if="line.tax_ids"><t t-esc="', '.join(line.tax_ids.mapped('name'))"/></t>
+                                <t t-else="">-</t>
+                            </td>
+                            <td class="number"><span t-field="line.price_total"/></td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+
+            <div class="summary-wrap">
+                <table class="summary-table">
+                    <tr>
+                        <td>Subtotal</td>
+                        <td><span t-field="o.amount_untaxed"/></td>
+                    </tr>
+                    <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
+                        <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
+                            <t t-set="tax_label" t-value="tax_group.get('group_name') or tax_group.get('group_label') or 'Impuestos'"/>
+                            <tr>
+                                <td t-esc="'IVA ' + tax_label[4:] if tax_label.startswith('Tax ') else tax_label"/>
+                                <td t-out="tax_group.get('tax_amount_currency', 0)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                            </tr>
+                        </t>
+                    </t>
+                    <tr t-if="not tax_totals.get('subtotals') and o.amount_tax">
+                        <td>Impuestos</td>
+                        <td><span t-field="o.amount_tax"/></td>
+                    </tr>
+                    <tr class="grand-total">
+                        <td>TOTAL</td>
+                        <td><span t-field="o.amount_total"/></td>
+                    </tr>
+                </table>
+            </div>
+
+            <table class="details-grid">
+                <tr>
+                    <td style="width: 50%;">
+                        <div class="section-title">INFORMACIÓN DE PAGO</div>
+                        <div><strong>Condición de la operación:</strong>
+                            <t t-if="o.invoice_payment_term_id"><span t-field="o.invoice_payment_term_id.name"/></t>
+                            <t t-elif="o.payment_state == 'paid'">CONTADO</t>
+                            <t t-else="">No especificada</t>
+                        </div>
+                        <div><strong>Forma de pago:</strong>
+                            <t t-if="o.matched_payment_ids">
+                                <t t-foreach="o.matched_payment_ids" t-as="payment">
+                                    <div>
+                                        <span t-field="payment.journal_id.name"/>
+                                        <t t-if="payment.payment_method_line_id"> / <span t-field="payment.payment_method_line_id.name"/></t>
+                                    </div>
+                                </t>
+                            </t>
+                            <t t-else="">Efectivo</t>
+                        </div>
+                    </td>
+                    <td style="width: 50%;">
+                        <div class="section-title">VALOR EN LETRAS</div>
+                        <div class="words-content"><span t-esc="o.currency_id.amount_to_text(o.amount_total)"/></div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="observations">
+                <div class="section-title">OBSERVACIONES</div>
+                <div class="observations-content"><span t-if="o.narration" t-field="o.narration"/></div>
+            </div>
+
+            <div class="legal-footer">
+                Representación gráfica para fines académicos. Este documento no constituye un DTE fiscal autorizado.
+            </div>
+        </div>
+    </template>
+</odoo>

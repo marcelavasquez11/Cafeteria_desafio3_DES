@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="grupo_impuesto_13" model="account.tax.group">
+            <field name="name">Tax 13%</field>
+            <field name="country_id" ref="base.us"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="impuesto_ventas_13" model="account.tax">
+            <field name="name">13%</field>
+            <field name="amount">13</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="tax_group_id" ref="grupo_impuesto_13"/>
+            <field name="country_id" ref="base.us"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="impuesto_compras_13" model="account.tax">
+            <field name="name">13%</field>
+            <field name="amount">13</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="tax_group_id" ref="grupo_impuesto_13"/>
+            <field name="country_id" ref="base.us"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+    </data>
+</odoo>

@@ -83,6 +83,11 @@
         <field name="view_id" ref="view_product_template_kanban_cafeteria"/>
     </record>
 
+    <record id="action_cafeteria_pos" model="ir.actions.client">
+        <field name="name">Cafetería</field>
+        <field name="tag">modulo_cafeteria.cafeteria_pos</field>
+    </record>
+
 
     <!-- Menú principal -->
     <menuitem
@@ -95,10 +100,26 @@
     <!-- Submenú Productos -->
     <menuitem
         id="menu_cafeteria_productos"
-        name="Productos"
+        name="Inventario"
         parent="menu_cafeteria_root"
         action="action_cafeteria"
         sequence="10"
+    />
+
+    <menuitem
+        id="menu_cafeteria_carrito"
+        name="Carrito"
+        parent="menu_cafeteria_root"
+        action="action_cafeteria_pos"
+        sequence="5"
+    />
+
+    <menuitem
+        id="menu_cafeteria_clientes"
+        name="Clientes"
+        parent="menu_cafeteria_root"
+        action="base.action_partner_form"
+        sequence="15"
     />
 
     <menuitem

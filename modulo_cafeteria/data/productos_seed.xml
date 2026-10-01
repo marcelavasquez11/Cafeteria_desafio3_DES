@@ -25,6 +25,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">2.50</field>
         <field name="standard_price">0.90</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">5</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/croissant.jpg"/>
     </record>
@@ -36,6 +38,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">3.00</field>
         <field name="standard_price">1.10</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">8</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/latte.jpg"/>
     </record>
@@ -47,6 +51,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">2.80</field>
         <field name="standard_price">1.00</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">6</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/capuchino.jpg"/>
     </record>
@@ -58,6 +64,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">2.60</field>
         <field name="standard_price">0.80</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">5</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/te_chai.jpg"/>
     </record>
@@ -69,6 +77,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">5.50</field>
         <field name="standard_price">2.50</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">4</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/sandwich.jpg"/>
     </record>
@@ -80,6 +90,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">2.20</field>
         <field name="standard_price">0.75</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">6</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/muffin.jpg"/>
     </record>
@@ -91,6 +103,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">1.80</field>
         <field name="standard_price">0.50</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">6</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/dona.jpg"/>
     </record>
@@ -102,6 +116,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">2.40</field>
         <field name="standard_price">0.70</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">5</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/limonada.jpg"/>
     </record>
@@ -113,6 +129,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">2.70</field>
         <field name="standard_price">0.90</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">5</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/zumo_naranja.jpg"/>
     </record>
@@ -124,6 +142,8 @@
         <field name="is_storable" eval="True"/>
         <field name="list_price">3.50</field>
         <field name="standard_price">1.40</field>
+        <field name="taxes_id" eval="[(6, 0, [ref('impuesto_ventas_13')])]"/>
+        <field name="supplier_taxes_id" eval="[(6, 0, [ref('impuesto_compras_13')])]"/>
         <field name="stock_minimo">4</field>
         <field name="image_1920" type="base64" file="modulo_cafeteria/static/description/productos/tarta_chocolate.jpg"/>
     </record>

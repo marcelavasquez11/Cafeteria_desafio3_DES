@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="modulo_cafeteria.CafeteriaPos" owl="1">
+        <main class="o_cafeteria_pos">
+            <header class="o_cafeteria_pos_header">
+                <div>
+                    <p class="o_cafeteria_pos_eyebrow">CAFETERÍA</p>
+                    <h1>Carrito</h1>
+                </div>
+                <span class="o_cafeteria_pos_count">
+                    <t t-esc="state.products.length"/> productos
+                </span>
+            </header>
+
+            <div class="o_cafeteria_pos_layout">
+                <section class="o_cafeteria_products" aria-label="Productos">
+                    <div t-if="state.loading" class="o_cafeteria_pos_message">
+                        Cargando productos...
+                    </div>
+                    <div t-elif="state.error" class="o_cafeteria_pos_message o_error">
+                        No se pudieron cargar los productos.
+                    </div>
+                    <div t-elif="!state.products.length" class="o_cafeteria_pos_message">
+                        No hay productos disponibles.
+                    </div>
+                    <div t-else="" class="o_cafeteria_products_grid">
+                        <t t-foreach="state.products" t-as="product" t-key="product.id">
+                            <article class="o_cafeteria_product">
+                                <div class="o_cafeteria_product_image">
+                                    <img
+                                        t-if="product.image_512"
+                                        t-att-src="'/web/image/product.template/' + product.id + '/image_512'"
+                                        t-att-alt="product.name"
+                                        loading="lazy"
+                                    />
+                                    <div t-else="" class="o_cafeteria_product_no_image">
+                                        Sin imagen
+                                    </div>
+                                </div>
+                                <div class="o_cafeteria_product_info">
+                                    <h2 t-esc="product.name"/>
+                                    <div class="o_cafeteria_product_details">
+                                        <span>
+                                            Stock:<t t-if="product.stock_bajo"><small class="ms-1" aria-hidden="true">⚠️</small></t>
+                                        </span>
+                                        <strong t-esc="this.formatStock(product.qty_available)"/>
+                                    </div>
+                                    <div class="o_cafeteria_product_price">
+                                        <span>Precio</span>
+                                        <strong t-esc="this.formatMoney(product.list_price)"/>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="o_cafeteria_add_button"
+                                        t-on-click="() => this.addProduct(product)"
+                                        t-att-disabled="product.qty_available &lt;= 0 || state.checkoutLoading"
+                                        t-att-aria-label="'Agregar ' + product.name"
+                                        title="Agregar al carrito"
+                                    >
+                                        <i class="fa fa-plus" aria-hidden="true"/>
+                                        <span>Agregar</span>
+                                    </button>
+                                </div>
+                            </article>
+                        </t>
+                    </div>
+                </section>
+
+                <aside class="o_cafeteria_cart" aria-label="Carrito">
+                    <div class="o_cafeteria_cart_header">
+                        <div>
+                            <h2>Tu carrito</h2>
+                            <span><t t-esc="itemCount"/> artículos</span>
+                        </div>
+                        <button
+                            type="button"
+                            class="o_cafeteria_clear_button"
+                            t-on-click="clearCart"
+                            t-att-disabled="!state.cart.length"
+                        >
+                            Vaciar carrito
+                        </button>
+                    </div>
+
+                    <div class="px-3 pt-3">
+                        <label for="cafeteria_customer_search" class="form-label mb-1">Cliente</label>
+                        <Many2One
+                            id="'cafeteria_customer_search'"
+                            relation="'res.partner'"
+                            value="state.selectedPartner"
+                            update.bind="selectCustomer"
+                            domain.bind="getCustomerDomain"
+                            context="{}"
+                            string="'Cliente'"
+                            placeholder="'Buscar cliente...'"
+                            canCreate="true"
+                            canCreateEdit="true"
+                            canQuickCreate="false"
+                            canOpen="false"
+                            cssClass="'o_cafeteria_customer_field'"
+                        />
+                    </div>
+
+                    <div t-if="!state.cart.length" class="o_cafeteria_cart_empty">
+                        <i class="fa fa-shopping-basket" aria-hidden="true"/>
+                        <p>El carrito está vacío</p>
+                    </div>
+                    <div t-else="" class="o_cafeteria_cart_lines">
+                        <t t-foreach="state.cart" t-as="line" t-key="line.product.id">
+                            <article class="o_cafeteria_cart_line">
+                                <div class="o_cafeteria_cart_line_info">
+                                    <h3 t-esc="line.product.name"/>
+                                    <span t-esc="this.formatMoney(line.product.list_price)"/>
+                                </div>
+                                <div class="o_cafeteria_cart_line_controls">
+                                    <div class="o_cafeteria_quantity_controls">
+                                        <button
+                                            type="button"
+                                            t-on-click="() => this.changeQuantity(line.product.id, -1)"
+                                            t-att-disabled="state.checkoutLoading"
+                                            t-att-aria-label="'Reducir cantidad de ' + line.product.name"
+                                            title="Reducir cantidad"
+                                        >
+                                            <i class="fa fa-minus" aria-hidden="true"/>
+                                        </button>
+                                        <span t-esc="line.quantity"/>
+                                        <button
+                                            type="button"
+                                            t-on-click="() => this.changeQuantity(line.product.id, 1)"
+                                            t-att-disabled="state.checkoutLoading"
+                                            t-att-aria-label="'Aumentar cantidad de ' + line.product.name"
+                                            title="Aumentar cantidad"
+                                        >
+                                            <i class="fa fa-plus" aria-hidden="true"/>
+                                        </button>
+                                    </div>
+                                    <strong t-esc="this.formatMoney(line.product.list_price * line.quantity)"/>
+                                    <button
+                                        type="button"
+                                        class="o_cafeteria_remove_button"
+                                        t-on-click="() => this.removeProduct(line.product.id)"
+                                        t-att-disabled="state.checkoutLoading"
+                                        t-att-aria-label="'Eliminar ' + line.product.name"
+                                        title="Eliminar producto"
+                                    >
+                                        <i class="fa fa-trash" aria-hidden="true"/>
+                                    </button>
+                                </div>
+                            </article>
+                        </t>
+                    </div>
+
+                    <div t-if="state.checkoutError" class="alert alert-danger mx-3 mb-2 py-2" role="alert">
+                        <t t-esc="state.checkoutError"/>
+                    </div>
+                    <div t-if="state.checkoutSuccess" class="alert alert-success mx-3 mb-2 py-2" role="status">
+                        <t t-esc="state.checkoutSuccess"/>
+                    </div>
+
+                    <div class="px-3 pt-3">
+                        <div class="d-flex justify-content-between py-1">
+                            <span>Subtotal</span>
+                            <strong t-esc="this.formatMoney(state.totals.amount_untaxed)"/>
+                        </div>
+                        <t t-foreach="state.totals.tax_lines" t-as="taxLine" t-key="taxLine_index">
+                            <div class="d-flex justify-content-between py-1 text-muted">
+                                <span t-esc="taxLine.name"/>
+                                <strong t-esc="this.formatMoney(taxLine.amount)"/>
+                            </div>
+                        </t>
+                        <div t-if="state.totalsLoading" class="form-text">Actualizando impuestos...</div>
+                        <div t-if="state.totalsError" class="form-text text-danger">
+                            <t t-esc="state.totalsError"/>
+                        </div>
+                    </div>
+                    <div class="o_cafeteria_cart_total">
+                        <span>Total general</span>
+                        <strong t-esc="this.formatMoney(state.totals.amount_total)"/>
+                    </div>
+                    <div class="px-3 pb-3">
+                        <button
+                            type="button"
+                            class="btn btn-primary w-100"
+                            t-on-click="checkout"
+                            t-att-disabled="!state.cart.length || !state.selectedPartner || state.checkoutLoading"
+                        >
+                            <t t-if="state.checkoutLoading">Procesando...</t>
+                            <t t-else="">Cobrar</t>
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </t>
+</templates>
