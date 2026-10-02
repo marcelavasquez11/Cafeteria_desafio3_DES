@@ -762,3 +762,32 @@
     font-weight: 700;
     color: #176b52;
 }
+
+// Botones de rango del gráfico de ventas del dashboard
+.o_cafeteria_dashboard_chart_head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    h2 { margin-bottom: 12px; }
+}
+
+.o_cafeteria_dashboard_rangos {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+
+    button {
+        padding: 4px 12px;
+        border: 1px solid #dce3de;
+        border-radius: 999px;
+        background: #fff;
+        color: #24332d;
+        font-size: 0.85rem;
+        font-weight: 600;
+
+        &.active { background: #176b52; border-color: #176b52; color: #fff; }
+    }
+}

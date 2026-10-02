@@ -1,10 +1,10 @@
 {
-    'name': 'Gestión de Cafetería',
+    'name': 'Cafetería Marymel',
 
     'summary': 'Gestión básica de clientes, productos, inventario, ventas y facturación.',
 
     'description': """
-        Sistema mínimo viable para la gestión de la cafetería.
+        Sistema mínimo viable para la gestión de la Cafetería Marymel.
 
         Permite gestionar:
         - Clientes
@@ -18,7 +18,7 @@
     'website': '',
 
     'category': 'Sales',
-    'version': '1.4.0',
+    'version': '1.5.0',
 
     'depends': [
     'base',
@@ -39,6 +39,8 @@
          "views/product_cafeteria_views.xml",
         'data/impuestos_13.xml',
         'data/productos_seed.xml',
+        'data/clientes_seed.xml',
+        'data/ventas_seed.xml',
         "views/sale_order_views.xml",
         'views/account_move_cafeteria_views.xml',
         'reports/factura_cafeteria_template.xml',

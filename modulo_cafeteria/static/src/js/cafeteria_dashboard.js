@@ -6,6 +6,14 @@ import { formatCurrency } from "@web/core/currency";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
+// Rangos del gráfico de ventas (semanas a mostrar y texto del botón)
+const RANGOS = [
+    { semanas: 1, texto: "Esta semana" },
+    { semanas: 4, texto: "4 semanas" },
+    { semanas: 8, texto: "8 semanas" },
+    { semanas: 12, texto: "12 semanas" },
+];
+
 // Pantalla de inicio de la cafetería: cards, gráfico semanal, top y alertas de stock
 class CafeteriaDashboard extends Component {
     static template = "modulo_cafeteria.CafeteriaDashboard";
@@ -20,7 +28,10 @@ class CafeteriaDashboard extends Component {
             error: false,
             // Pestaña de alertas visible: "minimo" (stock mínimo) o "agotados"
             tabAlertas: "minimo",
+            // Semanas que muestra el gráfico de ventas (1 = la semana actual por días)
+            semanas: 1,
         });
+        this.rangos = RANGOS;
 
         onWillStart(async () => {
             await loadBundle("web.chartjs_lib");
@@ -47,7 +58,7 @@ class CafeteriaDashboard extends Component {
         this.chart = new Chart(this.chartRef.el, {
             type: "line",
             data: {
-                labels: semana.dias,
+                labels: semana.etiquetas,
                 datasets: [
                     {
                         label: "Ventas",
@@ -72,6 +83,26 @@ class CafeteriaDashboard extends Component {
                 },
             },
         });
+    }
+
+    // Cambia el rango del gráfico: pide los datos al servidor y redibuja solo el gráfico
+    async cambiarRango(semanas) {
+        if (semanas === this.state.semanas) {
+            return;
+        }
+        this.state.semanas = semanas;
+        const datos = await this.orm.call("cafeteria.dashboard", "ventas_grafico", [semanas]);
+        this.state.datos.ventas_semana = datos;
+        this.chart.data.labels = datos.etiquetas;
+        this.chart.data.datasets[0].data = datos.montos;
+        this.chart.update();
+    }
+
+    // Título del gráfico según el rango elegido
+    get tituloGrafico() {
+        return this.state.semanas === 1
+            ? "Ventas de la semana"
+            : `Ventas por semana (últimas ${this.state.semanas})`;
     }
 
     // Abre la ficha del producto en el inventario

@@ -4,7 +4,7 @@
         <main class="o_cafeteria_dashboard">
             <header class="o_cafeteria_dashboard_header">
                 <div>
-                    <p class="o_cafeteria_dashboard_eyebrow">CAFETERÍA</p>
+                    <p class="o_cafeteria_dashboard_eyebrow">CAFETERÍA MARYMEL</p>
                     <h1>Dashboard</h1>
                 </div>
                 <span class="o_cafeteria_dashboard_date">
@@ -54,7 +54,17 @@
                 <div class="o_cafeteria_dashboard_grid">
                     <!-- Gráfico de ventas de la semana -->
                     <section class="o_cafeteria_dashboard_panel">
-                        <h2><i class="fa fa-area-chart me-2" aria-hidden="true"/>Ventas de la semana</h2>
+                        <div class="o_cafeteria_dashboard_chart_head">
+                            <h2><i class="fa fa-area-chart me-2" aria-hidden="true"/><t t-esc="tituloGrafico"/></h2>
+                            <!-- Rango del gráfico: esta semana o varias semanas -->
+                            <div class="o_cafeteria_dashboard_rangos">
+                                <button t-foreach="rangos" t-as="rango" t-key="rango.semanas" type="button"
+                                        t-att-class="{ 'active': state.semanas === rango.semanas }"
+                                        t-on-click="() => this.cambiarRango(rango.semanas)">
+                                    <t t-esc="rango.texto"/>
+                                </button>
+                            </div>
+                        </div>
                         <div class="o_cafeteria_dashboard_chart">
                             <canvas t-ref="chart"/>
                         </div>

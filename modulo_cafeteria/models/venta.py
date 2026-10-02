@@ -205,7 +205,10 @@ class VentaCafeteria(models.Model):
     def _action_cancel(self):
         if any(venta.estado_venta == "pagada" for venta in self):
             raise UserError(_("Una venta pagada no se puede cancelar."))
+        # Las ventas ya confirmadas devuelven el stock propio de sus combos
+        confirmadas = self.filtered(lambda v: v.state == "sale")
         resultado = super()._action_cancel()
+        confirmadas._mover_stock_combos(1)
         self.with_context(permitir_edicion_pagada=True).estado_venta = "cancelada"
         return resultado
 

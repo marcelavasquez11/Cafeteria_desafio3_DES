@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Clientes de ejemplo (datos ficticios). Se cargan una sola vez al instalar. -->
+    <data noupdate="1">
+
+        <!-- Regulares -->
+        <record id="cliente_seed_maria" model="res.partner">
+            <field name="name">María López</field>
+            <field name="email">maria.lopez@correo.com</field>
+            <field name="phone">7012-3456</field>
+            <field name="dui">04512345-6</field>
+            <field name="street">Colonia Escalón, San Salvador</field>
+            <field name="categoria_cliente">regular</field>
+            <field name="fecha_registro" eval="(DateTime.today() - relativedelta(days=40)).strftime('%Y-%m-%d')"/>
+        </record>
+        <record id="cliente_seed_carlos" model="res.partner">
+            <field name="name">Carlos Hernández</field>
+            <field name="email">carlos.hernandez@correo.com</field>
+            <field name="phone">7123-4567</field>
+            <field name="dui">03678912-4</field>
+            <field name="street">Residencial Cumbres, Soyapango</field>
+            <field name="categoria_cliente">regular</field>
+            <field name="fecha_registro" eval="(DateTime.today() - relativedelta(days=25)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- Frecuentes (7% de descuento) -->
+        <record id="cliente_seed_ana" model="res.partner">
+            <field name="name">Ana Martínez</field>
+            <field name="email">ana.martinez@correo.com</field>
+            <field name="phone">7234-5678</field>
+            <field name="dui">05123478-9</field>
+            <field name="street">Colonia Médica, San Salvador</field>
+            <field name="categoria_cliente">frecuente</field>
+            <field name="fecha_registro" eval="(DateTime.today() - relativedelta(days=90)).strftime('%Y-%m-%d')"/>
+        </record>
+        <record id="cliente_seed_jose" model="res.partner">
+            <field name="name">José Ramírez</field>
+            <field name="email">jose.ramirez@correo.com</field>
+            <field name="phone">7345-6789</field>
+            <field name="dui">02987654-3</field>
+            <field name="street">Colonia San Benito, San Salvador</field>
+            <field name="categoria_cliente">frecuente</field>
+            <field name="fecha_registro" eval="(DateTime.today() - relativedelta(days=60)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- Corporativo: empresa que contrata catering (10% de descuento) -->
+        <record id="cliente_seed_universidad" model="res.partner">
+            <field name="name">Universidad Don Bosco</field>
+            <field name="is_company" eval="True"/>
+            <field name="email">compras@universidad.edu.sv</field>
+            <field name="phone">2251-8000</field>
+            <field name="street">Ciudadela Don Bosco, Soyapango</field>
+            <field name="categoria_cliente">corporativo</field>
+            <field name="fecha_registro" eval="(DateTime.today() - relativedelta(days=120)).strftime('%Y-%m-%d')"/>
+        </record>
+
+    </data>
+</odoo>

@@ -9,6 +9,11 @@ from .cliente import ESTADOS_COMPRA
 # Cantidad de productos que se muestran en el top de más vendidos
 CANTIDAD_TOP = 5
 DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+
+# Rangos que se pueden elegir en el gráfico de ventas: 1 = la semana actual (un punto por día),
+# 4, 8 o 12 = esa cantidad de semanas hasta hoy (un punto por semana)
+OPCIONES_SEMANAS = (1, 4, 8, 12)
 
 
 class CafeteriaDashboard(models.AbstractModel):
@@ -33,6 +38,41 @@ class CafeteriaDashboard(models.AbstractModel):
         return ventas, {"monto": sum(ventas.mapped("amount_total")), "cantidad": len(ventas)}
 
     @api.model
+    def ventas_grafico(self, semanas=1):
+        # Datos del gráfico de ventas.
+        # semanas=1: ventas de cada día de la semana actual (lunes a domingo).
+        # semanas=4, 8 o 12: total vendido en cada una de las últimas N semanas (incluye la actual).
+        if semanas not in OPCIONES_SEMANAS:
+            semanas = 1
+        tz = pytz.timezone(self.env.user.tz or "UTC")
+        hoy = datetime.now(tz).date()
+
+        # La semana actual empieza el lunes y termina el domingo
+        inicio_semana_actual = hoy - timedelta(days=hoy.weekday())
+        fin = inicio_semana_actual + timedelta(days=7)
+
+        if semanas == 1:
+            inicio = inicio_semana_actual
+            etiquetas = DIAS_SEMANA
+            dias_por_punto = 1
+        else:
+            # Se retrocede N-1 semanas desde la actual; cada punto es una semana, rotulada con
+            # la fecha de su lunes (ej. "29 sep")
+            inicio = inicio_semana_actual - timedelta(weeks=semanas - 1)
+            lunes = [inicio + timedelta(weeks=i) for i in range(semanas)]
+            etiquetas = ["%d %s" % (dia.day, MESES[dia.month - 1]) for dia in lunes]
+            dias_por_punto = 7
+
+        ventas, _ = self._resumen_ventas(self._a_utc(tz, inicio), self._a_utc(tz, fin))
+
+        # Cada venta se suma al punto que le corresponde según su fecha local
+        montos = [0.0] * len(etiquetas)
+        for venta in ventas:
+            dia = pytz.utc.localize(venta.date_order).astimezone(tz).date()
+            montos[(dia - inicio).days // dias_por_punto] += venta.amount_total
+        return {"etiquetas": etiquetas, "montos": montos}
+
+    @api.model
     def obtener_datos(self):
         tz = pytz.timezone(self.env.user.tz or "UTC")
         hoy = datetime.now(tz).date()
@@ -48,16 +88,6 @@ class CafeteriaDashboard(models.AbstractModel):
         _, ventas_mes = self._resumen_ventas(
             self._a_utc(tz, inicio_mes), self._a_utc(tz, siguiente_mes)
         )
-
-        # Ventas de cada día de la semana actual (lunes a domingo)
-        inicio_semana = hoy - timedelta(days=hoy.weekday())
-        ventas_semana, _ = self._resumen_ventas(
-            self._a_utc(tz, inicio_semana), self._a_utc(tz, inicio_semana + timedelta(days=7))
-        )
-        monto_por_dia = [0.0] * 7
-        for venta in ventas_semana:
-            dia = pytz.utc.localize(venta.date_order).astimezone(tz).date()
-            monto_por_dia[(dia - inicio_semana).days] += venta.amount_total
 
         # Top de productos más vendidos del mes (por unidades)
         top = self.env["sale.order.line"]._read_group(
@@ -89,7 +119,7 @@ class CafeteriaDashboard(models.AbstractModel):
             "productos_en_stock": len(con_stock),
             "ventas_hoy": ventas_hoy,
             "ventas_mes": ventas_mes,
-            "ventas_semana": {"dias": DIAS_SEMANA, "montos": monto_por_dia},
+            "ventas_semana": self.ventas_grafico(1),
             "top_productos": [
                 {
                     "id": producto.product_tmpl_id.id,

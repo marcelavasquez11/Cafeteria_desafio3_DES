@@ -10,222 +10,228 @@
     </template>
 
     <template id="factura_cafeteria_document">
-        <t t-set="company_partner" t-value="o.company_id.partner_id"/>
-        <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
+        <!-- Datos simulados del DTE (códigos, emisor, QR) y venta de origen -->
+        <t t-set="dte" t-value="o._dte_datos()"/>
+        <t t-set="emisor" t-value="dte['emisor']"/>
         <t t-set="venta" t-value="o.invoice_line_ids.sale_line_ids.order_id[:1]"/>
+        <t t-set="lineas" t-value="o.invoice_line_ids.filtered(lambda line: line.display_type == 'product')"/>
         <style type="text/css">
-            .cafeteria-invoice { color: #24332d; font-family: "DejaVu Sans", sans-serif; font-size: 10px; }
-            .cafeteria-invoice h1, .cafeteria-invoice h2, .cafeteria-invoice h3 { margin: 0; }
-            .cafeteria-invoice .brand { color: #176b52; font-size: 25px; font-weight: 700; }
-            .cafeteria-invoice .document-title { color: #176b52; font-size: 17px; font-weight: 700; text-align: right; }
-            .cafeteria-invoice .document-subtitle { color: #69766f; font-size: 9px; text-align: right; }
-            .cafeteria-invoice .invoice-number { font-size: 12px; font-weight: 700; }
-            .cafeteria-invoice .header-table, .cafeteria-invoice .parties-table, .cafeteria-invoice .lines-table, .cafeteria-invoice .summary-table { border-collapse: collapse; width: 100%; }
-            .cafeteria-invoice .header-table td { padding: 0 0 10px; vertical-align: top; }
-            .cafeteria-invoice .metadata { border-bottom: 2px solid #176b52; margin-bottom: 12px; padding: 8px 0; }
-            .cafeteria-invoice .metadata td { padding: 3px 8px 3px 0; }
-            .cafeteria-invoice .section-title { background: #e8efeb; border-left: 3px solid #176b52; font-size: 10px; font-weight: 700; margin: 9px 0 5px; padding: 5px 7px; }
-            .cafeteria-invoice .parties-table { margin-bottom: 8px; }
-            .cafeteria-invoice .parties-table td { border: 1px solid #dce3de; padding: 7px; vertical-align: top; width: 50%; }
-            .cafeteria-invoice .party-name { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+            .cafeteria-invoice { color: #24332d; font-family: "DejaVu Sans", sans-serif; font-size: 9px; }
+            .cafeteria-invoice table { border-collapse: collapse; width: 100%; }
             .cafeteria-invoice .muted { color: #69766f; }
-            .cafeteria-invoice .lines-table { font-size: 8px; }
+            .cafeteria-invoice .version { color: #69766f; font-size: 8px; text-align: right; }
+            .cafeteria-invoice .dte-title { color: #176b52; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-align: center; }
+            .cafeteria-invoice .dte-name { color: #176b52; font-size: 20px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+            .cafeteria-invoice .codes-table { border-bottom: 2px solid #176b52; border-top: 2px solid #176b52; margin-bottom: 10px; }
+            .cafeteria-invoice .codes-table td { padding: 6px 4px; vertical-align: middle; }
+            .cafeteria-invoice .codes-table .qr { width: 15%; }
+            .cafeteria-invoice .codes-table .qr img { height: 78px; width: 78px; }
+            .cafeteria-invoice .codes-table .label { color: #176b52; font-weight: 700; }
+            .cafeteria-invoice .section-title { background: #e8efeb; border-left: 3px solid #176b52; font-size: 9px; font-weight: 700; margin: 8px 0 4px; padding: 4px 7px; text-align: center; }
+            .cafeteria-invoice .parties-table td { border: 1px solid #dce3de; padding: 6px 8px; vertical-align: top; width: 50%; }
+            .cafeteria-invoice .parties-table .party-title { color: #176b52; font-size: 9px; font-weight: 700; margin-bottom: 4px; text-align: center; }
+            .cafeteria-invoice .parties-table .row { padding: 1px 0; }
+            .cafeteria-invoice .box-table td { border: 1px solid #dce3de; padding: 5px 8px; vertical-align: top; }
+            .cafeteria-invoice .box-table .head { background: #e8efeb; font-weight: 700; text-align: center; }
+            .cafeteria-invoice .lines-table { font-size: 8px; margin-top: 8px; }
             .cafeteria-invoice .lines-table thead { display: table-header-group; }
-            .cafeteria-invoice .lines-table th { background: #176b52; color: #fff; padding: 6px 4px; text-align: left; }
-            .cafeteria-invoice .lines-table td { border-bottom: 1px solid #dce3de; padding: 6px 4px; vertical-align: top; }
+            .cafeteria-invoice .lines-table th { background: #176b52; color: #fff; padding: 5px 3px; text-align: center; }
+            .cafeteria-invoice .lines-table td { border-bottom: 1px solid #dce3de; padding: 5px 3px; vertical-align: top; }
             .cafeteria-invoice .lines-table tr { page-break-inside: avoid; break-inside: avoid; }
             .cafeteria-invoice .number { text-align: right !important; white-space: nowrap; }
-            .cafeteria-invoice .summary-wrap { margin-top: 10px; page-break-inside: avoid; break-inside: avoid; }
-            .cafeteria-invoice .summary-table { margin-left: auto; width: 48%; }
-            .cafeteria-invoice .summary-table td { padding: 4px 6px; text-align: right; }
-            .cafeteria-invoice .summary-table td:first-child { text-align: left; }
-            .cafeteria-invoice .summary-table .grand-total td { border-top: 2px solid #176b52; color: #176b52; font-size: 13px; font-weight: 700; padding-top: 7px; }
-            .cafeteria-invoice .details-grid { border-top: 1px solid #dce3de; margin-top: 12px; padding-top: 8px; }
-            .cafeteria-invoice .details-grid td { padding: 3px 12px 3px 0; vertical-align: top; }
-            .cafeteria-invoice .words, .cafeteria-invoice .observations { margin-top: 10px; }
-            .cafeteria-invoice .words-content, .cafeteria-invoice .observations-content { border: 1px solid #dce3de; min-height: 22px; padding: 6px; }
+            .cafeteria-invoice .totals-table { margin-top: 2px; page-break-inside: avoid; break-inside: avoid; }
+            .cafeteria-invoice .totals-table td { padding: 3px 3px; text-align: right; }
+            .cafeteria-invoice .totals-table .label { font-weight: 700; text-align: right; }
+            .cafeteria-invoice .totals-table .grand-total td { border-top: 2px solid #176b52; color: #176b52; font-size: 12px; font-weight: 700; padding-top: 6px; }
+            .cafeteria-invoice .footer-table { margin-top: 10px; }
+            .cafeteria-invoice .footer-table td { border: 1px solid #dce3de; padding: 5px 8px; vertical-align: top; }
+            .cafeteria-invoice .footer-table .label { color: #176b52; font-weight: 700; width: 22%; }
             .cafeteria-invoice .legal-footer { border-top: 1px solid #dce3de; color: #69766f; font-size: 8px; margin-top: 14px; padding-top: 4px; text-align: center; page-break-inside: avoid; }
         </style>
 
         <div class="page cafeteria-invoice">
-            <table class="header-table">
+            <div class="version">Ver.1</div>
+            <div class="dte-title">DOCUMENTO TRIBUTARIO ELECTRÓNICO</div>
+            <div class="dte-name">FACTURA</div>
+
+            <!-- Códigos del DTE (simulados) y QR -->
+            <table class="codes-table">
                 <tr>
-                    <td style="width: 55%;">
-                        <div class="brand">CAFETERÍA</div>
-                        <div class="muted">Factura de venta</div>
+                    <td class="qr"><img t-att-src="'data:image/png;base64,' + dte['qr']"/></td>
+                    <td style="width: 52%;">
+                        <div><span class="label">Código de Generación:</span> <span t-esc="dte['codigo_generacion']"/></div>
+                        <div><span class="label">Número de Control:</span> <span t-esc="dte['numero_control']"/></div>
+                        <div><span class="label">Sello de Recepción:</span> <span t-esc="dte['sello_recepcion']"/></div>
                     </td>
-                    <td style="width: 45%;">
-                        <div class="document-title">FACTURA</div>
-                        <div class="document-subtitle">DOCUMENTO TRIBUTARIO ELECTRÓNICO</div>
-                        <div class="document-subtitle">Representación gráfica</div>
+                    <td style="width: 33%;">
+                        <div><span class="label">Modelo de Facturación:</span> Previo</div>
+                        <div><span class="label">Tipo de Transmisión:</span> Normal</div>
+                        <div><span class="label">Fecha y Hora de Generación:</span> <span t-esc="dte['fecha_hora']"/></div>
                     </td>
                 </tr>
             </table>
 
-            <table class="metadata">
-                <tr>
-                    <td><strong>Número:</strong> <span class="invoice-number" t-field="o.name"/></td>
-                    <td><strong>Fecha de emisión:</strong>
-                        <span t-if="o.invoice_date" t-field="o.invoice_date"/>
-                        <span t-else="" t-field="o.date"/>
-                    </td>
-                    <td><strong>Estado:</strong>
-                        <t t-if="o.state == 'posted'">Publicada</t>
-                        <t t-elif="o.state == 'cancel'">Anulada</t>
-                        <t t-else="">Borrador</t>
-                    </td>
-                </tr>
-            </table>
-
-            <div class="section-title">EMISOR</div>
-            <table class="parties-table">
-                <tr>
-                    <td colspan="2" style="width: 100%;">
-                        <div class="party-name">CAFETERÍA</div>
-                        <div><strong>Dirección:</strong> El Salvador, San Salvador</div>
-                        <div><strong>Teléfono:</strong> 2298-2000</div>
-                        <div t-if="company_partner.vat"><strong>NIT:</strong> <span t-field="company_partner.vat"/></div>
-                        <div t-if="company_partner.company_registry"><strong>NRC:</strong> <span t-field="company_partner.company_registry"/></div>
-                        <div t-if="company_partner.email"><strong>Correo:</strong> <span t-field="company_partner.email"/></div>
-                        <div t-if="company_partner.industry_id"><strong>Actividad económica:</strong> <span t-field="company_partner.industry_id.name"/></div>
-                    </td>
-                </tr>
-            </table>
-
-            <div class="section-title">RECEPTOR</div>
+            <!-- Emisor y receptor -->
             <table class="parties-table">
                 <tr>
                     <td>
-                        <div class="party-name" t-field="o.partner_id.name"/>
-                        <div t-if="o.partner_id.vat"><strong>NIT:</strong> <span t-field="o.partner_id.vat"/></div>
-                        <div t-if="o.partner_id.company_registry"><strong>NRC:</strong> <span t-field="o.partner_id.company_registry"/></div>
-                        <div t-if="o.partner_id.street or o.partner_id.street2 or o.partner_id.city or o.partner_id.state_id or o.partner_id.zip or o.partner_id.country_id">
-                            <strong>Dirección:</strong>
-                            <span t-if="o.partner_id.street" t-field="o.partner_id.street"/>
-                            <span t-if="o.partner_id.street2">, <span t-field="o.partner_id.street2"/></span>
-                            <span t-if="o.partner_id.city">, <span t-field="o.partner_id.city"/></span>
-                            <span t-if="o.partner_id.state_id">, <span t-field="o.partner_id.state_id.name"/></span>
-                            <span t-if="o.partner_id.zip">, <span t-field="o.partner_id.zip"/></span>
-                            <span t-if="o.partner_id.country_id">, <span t-field="o.partner_id.country_id.name"/></span>
-                        </div>
-                        <div t-if="o.partner_id.phone"><strong>Teléfono:</strong> <span t-field="o.partner_id.phone"/></div>
-                        <div t-if="o.partner_id.email"><strong>Correo:</strong> <span t-field="o.partner_id.email"/></div>
+                        <div class="party-title">EMISOR</div>
+                        <div class="row"><strong>Nombre o razón social:</strong> <span t-esc="emisor['razon_social']"/></div>
+                        <div class="row"><strong>NIT:</strong> <span t-esc="emisor['nit']"/></div>
+                        <div class="row"><strong>NRC:</strong> <span t-esc="emisor['nrc']"/></div>
+                        <div class="row"><strong>Actividad económica:</strong> <span t-esc="emisor['actividad']"/></div>
+                        <div class="row"><strong>Dirección:</strong> <span t-esc="emisor['direccion']"/></div>
+                        <div class="row"><strong>Número de teléfono:</strong> <span t-esc="emisor['telefono']"/></div>
+                        <div class="row"><strong>Correo electrónico:</strong> <span t-esc="emisor['correo']"/></div>
+                        <div class="row"><strong>Nombre comercial:</strong> <span t-esc="emisor['nombre_comercial']"/></div>
+                        <div class="row"><strong>Tipo de establecimiento:</strong> <span t-esc="emisor['tipo_establecimiento']"/></div>
                     </td>
                     <td>
-                        <div class="party-name">Datos de facturación</div>
-                        <div t-if="o.invoice_date_due"><strong>Fecha de vencimiento:</strong> <span t-field="o.invoice_date_due"/></div>
-                        <div t-if="o.invoice_origin"><strong>Documento relacionado:</strong> <span t-field="o.invoice_origin"/></div>
+                        <div class="party-title">RECEPTOR</div>
+                        <div class="row"><strong>Nombre o razón social:</strong> <span t-esc="o.partner_id.name"/></div>
+                        <div class="row"><strong>DUI:</strong> <span t-esc="o.partner_id.dui or '-'"/></div>
+                        <div class="row"><strong>NIT:</strong> <span t-esc="o.partner_id.vat or '-'"/></div>
+                        <div class="row"><strong>Dirección:</strong> <span t-esc="o.partner_id.street or '-'"/></div>
+                        <div class="row"><strong>Número de teléfono:</strong> <span t-esc="o.partner_id.phone or '-'"/></div>
+                        <div class="row"><strong>Correo electrónico:</strong> <span t-esc="o.partner_id.email or '-'"/></div>
                     </td>
                 </tr>
             </table>
 
-            <div class="section-title">DETALLE DE PRODUCTOS</div>
+            <!-- Venta a cuenta de terceros -->
+            <div class="section-title">VENTA A CUENTA DE TERCEROS</div>
+            <table class="box-table">
+                <tr>
+                    <td style="width: 50%;"><strong>NIT:</strong> -</td>
+                    <td style="width: 50%;"><strong>Nombre, denominación o razón social:</strong> -</td>
+                </tr>
+            </table>
+
+            <!-- Documentos relacionados (la venta que originó la factura) -->
+            <div class="section-title">DOCUMENTOS RELACIONADOS</div>
+            <table class="box-table">
+                <tr>
+                    <td class="head" style="width: 34%;">Tipo de Documento</td>
+                    <td class="head" style="width: 33%;">N° de Documento</td>
+                    <td class="head" style="width: 33%;">Fecha de Documento</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;"><t t-if="venta">Orden de venta</t><t t-else="">-</t></td>
+                    <td style="text-align: center;"><t t-esc="o.invoice_origin or '-'"/></td>
+                    <td style="text-align: center;">
+                        <t t-if="venta"><span t-esc="venta.date_order.strftime('%Y-%m-%d')"/></t>
+                        <t t-else="">-</t>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="section-title">OTROS DOCUMENTOS ASOCIADOS</div>
+            <table class="box-table">
+                <tr>
+                    <td class="head" style="width: 50%;">Identificación del documento</td>
+                    <td class="head" style="width: 50%;">Descripción</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+            </table>
+
+            <!-- Detalle de productos -->
             <table class="lines-table">
                 <thead>
                     <tr>
                         <th style="width: 4%;">N°</th>
-                        <th class="number" style="width: 8%;">Cantidad</th>
-                        <th style="width: 8%;">Unidad</th>
-                        <th style="width: 31%;">Descripción</th>
-                        <th class="number" style="width: 13%;">Precio unitario</th>
-                        <th class="number" style="width: 9%;">Descuento</th>
-                        <th style="width: 12%;">Impuesto</th>
-                        <th class="number" style="width: 15%;">Total</th>
+                        <th style="width: 7%;">Cantidad</th>
+                        <th style="width: 7%;">Unidad</th>
+                        <th style="width: 25%;">Descripción</th>
+                        <th style="width: 9%;">Precio Unitario</th>
+                        <th style="width: 9%;">Otros montos no afectos</th>
+                        <th style="width: 9%;">Descuento por ítem</th>
+                        <th style="width: 9%;">Ventas No Sujetas</th>
+                        <th style="width: 9%;">Ventas Exentas</th>
+                        <th style="width: 12%;">Ventas Gravadas</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="o.invoice_line_ids.filtered(lambda line: line.display_type == 'product')" t-as="line">
+                    <t t-foreach="lineas" t-as="line">
                         <tr>
-                            <td t-esc="line_index + 1"/>
-                            <td class="number"><span t-field="line.quantity"/></td>
-                            <td><span t-field="line.product_uom_id.name"/></td>
-                            <td><span t-field="line.name"/></td>
-                            <td class="number"><span t-field="line.price_unit"/></td>
-                            <td class="number">
-                                <t t-if="line.discount"><span t-field="line.discount"/>%</t>
-                                <t t-else="">-</t>
-                            </td>
-                            <td>
-                                <t t-if="line.tax_ids"><t t-esc="', '.join(line.tax_ids.mapped('name'))"/></t>
-                                <t t-else="">-</t>
-                            </td>
-                            <td class="number"><span t-field="line.price_total"/></td>
+                            <td style="text-align: center;" t-esc="line_index + 1"/>
+                            <td class="number" t-esc="'%.2f' % line.quantity"/>
+                            <td style="text-align: center;">Unidad</td>
+                            <td t-esc="line.name"/>
+                            <td class="number" t-esc="'%.2f' % line.price_unit"/>
+                            <td class="number">0.00</td>
+                            <td class="number" t-esc="'%.2f' % max(line.quantity * line.price_unit - line.price_total, 0)"/>
+                            <td class="number">0.00</td>
+                            <td class="number">0.00</td>
+                            <td class="number" t-esc="'%.2f' % line.price_total"/>
                         </tr>
                     </t>
                 </tbody>
             </table>
 
-            <div class="summary-wrap">
-                <table class="summary-table">
-                    <tr>
-                        <td>Subtotal</td>
-                        <td><span t-field="o.amount_untaxed"/></td>
-                    </tr>
-                    <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
-                        <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
-                            <t t-set="tax_label" t-value="tax_group.get('group_name') or tax_group.get('group_label') or 'Impuestos'"/>
-                            <tr>
-                                <td t-esc="'IVA ' + tax_label[4:] if tax_label.startswith('Tax ') else tax_label"/>
-                                <td t-out="tax_group.get('tax_amount_currency', 0)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                            </tr>
-                        </t>
-                    </t>
-                    <tr t-if="not tax_totals.get('subtotals') and o.amount_tax">
-                        <td>Impuestos</td>
-                        <td><span t-field="o.amount_tax"/></td>
-                    </tr>
-                    <tr class="grand-total">
-                        <td>TOTAL</td>
-                        <td><span t-field="o.amount_total"/></td>
-                    </tr>
-                </table>
-            </div>
-
-            <table class="details-grid">
+            <!-- Resumen de la operación -->
+            <table class="totals-table">
                 <tr>
-                    <td style="width: 50%;">
-                        <div class="section-title">INFORMACIÓN DE PAGO</div>
-                        <div><strong>Condición de la operación:</strong>
-                            <t t-if="o.invoice_payment_term_id"><span t-field="o.invoice_payment_term_id.name"/></t>
-                            <t t-elif="o.payment_state in ('paid', 'in_payment')">CONTADO</t>
-                            <t t-else="">PENDIENTE DE PAGO</t>
-                        </div>
-                        <div><strong>Forma de pago:</strong>
-                            <t t-if="venta.metodo_pago == 'tarjeta'">Tarjeta
-                                <t t-if="venta.tarjeta_marca">(<span t-field="venta.tarjeta_marca"/><t t-if="venta.tarjeta_ultimos4"> **** <span t-field="venta.tarjeta_ultimos4"/></t>)</t>
-                            </t>
-                            <t t-elif="venta.metodo_pago == 'efectivo'">Efectivo</t>
-                            <t t-elif="o.matched_payment_ids">
-                                <t t-foreach="o.matched_payment_ids" t-as="payment">
-                                    <span t-field="payment.journal_id.name"/>
-                                </t>
-                            </t>
-                            <t t-else="">No especificada</t>
-                        </div>
-                        <div t-if="venta.metodo_pago == 'tarjeta' and venta.tarjeta_autorizacion">
-                            <strong>Código de autorización:</strong> <span t-field="venta.tarjeta_autorizacion"/>
-                        </div>
-                        <div t-if="venta.metodo_pago == 'efectivo' and venta.efectivo_recibido">
-                            <strong>Efectivo recibido:</strong> <span t-field="venta.efectivo_recibido"/>
-                        </div>
-                        <div t-if="venta.metodo_pago == 'efectivo' and venta.efectivo_recibido">
-                            <strong>Vuelto:</strong> <span t-field="venta.vuelto"/>
-                        </div>
-                    </td>
-                    <td style="width: 50%;">
-                        <div class="section-title">VALOR EN LETRAS</div>
-                        <div class="words-content"><span t-esc="o.currency_id.amount_to_text(o.amount_total)"/></div>
-                    </td>
+                    <td class="label" style="width: 55%;">Suma de Ventas:</td>
+                    <td style="width: 15%;">0.00</td>
+                    <td style="width: 15%;">0.00</td>
+                    <td style="width: 15%;" t-esc="'%.2f' % o.amount_total"/>
+                </tr>
+                <tr><td class="label" colspan="3">Sumatoria de ventas:</td><td t-esc="'%.2f' % o.amount_total"/></tr>
+                <tr><td class="label" colspan="3">Monto global Desc., Rebajas y otros a ventas no sujetas:</td><td>0.00</td></tr>
+                <tr><td class="label" colspan="3">Monto global Desc., Rebajas y otros a ventas Exentas:</td><td>0.00</td></tr>
+                <tr><td class="label" colspan="3">Monto global Desc., Rebajas y otros a ventas gravadas:</td><td>0.00</td></tr>
+                <tr><td class="label" colspan="3">Sub-Total:</td><td t-esc="'%.2f' % o.amount_total"/></tr>
+                <tr><td class="label" colspan="3">IVA Retenido:</td><td>0.00</td></tr>
+                <tr><td class="label" colspan="3">Monto Total de la Operación:</td><td t-esc="'%.2f' % o.amount_total"/></tr>
+                <tr><td class="label" colspan="3">Total Otros Montos No Afectos:</td><td>0.00</td></tr>
+                <tr class="grand-total">
+                    <td class="label" colspan="3">Total a Pagar:</td>
+                    <td t-esc="'$ %.2f' % o.amount_total"/>
                 </tr>
             </table>
 
-            <div class="observations">
-                <div class="section-title">OBSERVACIONES</div>
-                <div class="observations-content"><span t-if="o.narration" t-field="o.narration"/></div>
-            </div>
+            <!-- Valor en letras, condición y forma de pago (dinámicos) -->
+            <table class="footer-table">
+                <tr>
+                    <td class="label">Valor en Letras:</td>
+                    <td t-esc="o._dte_valor_en_letras()"/>
+                </tr>
+                <tr>
+                    <td class="label">Condición de la Operación:</td>
+                    <td>
+                        <t t-if="o.invoice_payment_term_id"><span t-field="o.invoice_payment_term_id.name"/></t>
+                        <t t-elif="o.payment_state in ('paid', 'in_payment')">Contado</t>
+                        <t t-else="">Pendiente de pago</t>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Forma de pago:</td>
+                    <td>
+                        <t t-if="venta.metodo_pago == 'tarjeta'">Tarjeta
+                            <t t-if="venta.tarjeta_marca">(<span t-field="venta.tarjeta_marca"/><t t-if="venta.tarjeta_ultimos4"> **** <span t-field="venta.tarjeta_ultimos4"/></t>)</t>
+                            <t t-if="venta.tarjeta_autorizacion"> · Autorización: <span t-field="venta.tarjeta_autorizacion"/></t>
+                        </t>
+                        <t t-elif="venta.metodo_pago == 'efectivo'">Efectivo
+                            <t t-if="venta.efectivo_recibido"> · Recibido: <span t-field="venta.efectivo_recibido"/> · Vuelto: <span t-field="venta.vuelto"/></t>
+                        </t>
+                        <t t-elif="o.matched_payment_ids">
+                            <t t-foreach="o.matched_payment_ids" t-as="payment"><span t-field="payment.journal_id.name"/></t>
+                        </t>
+                        <t t-else="">-</t>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Observaciones:</td>
+                    <td><t t-if="o.narration"><span t-field="o.narration"/></t><t t-else="">-</t></td>
+                </tr>
+            </table>
 
             <div class="legal-footer">
                 Representación gráfica para fines académicos. Este documento no constituye un DTE fiscal autorizado.
+                Códigos, sello y QR simulados.
             </div>
         </div>
     </template>

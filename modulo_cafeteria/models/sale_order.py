@@ -1,6 +1,6 @@
 import math
 
-from odoo import _, api, fields, models
+from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -14,10 +14,70 @@ class SaleOrderLine(models.Model):
         currency_field="currency_id",
     )
 
-    @api.depends("price_total")
+    def _combo_suelto(self):
+        # Un combo "suelto" se vende como un producto normal, con su propio precio y su propio
+        # stock (el que se escribe en la tarjeta de stock del combo). No tiene líneas hijas
+        # con los productos que lo componen, así que no mueve el inventario de esos productos.
+        self.ensure_one()
+        return self.product_id.type == "combo" and not self.linked_line_ids
+
+    def _get_display_price(self):
+        # Odoo pone siempre en 0 el precio de la línea de un combo (el precio va en sus líneas
+        # hijas). Un combo suelto no tiene hijas: se cobra su precio de venta normal.
+        self.ensure_one()
+        if self._combo_suelto():
+            return self._get_display_price_ignore_combo()
+        return super()._get_display_price()
+
+    def _prepare_invoice_line(self, **optional_values):
+        # Odoo pone la línea de un combo en la factura como un simple título (precio 0), porque
+        # el precio va en las líneas de sus productos. Un combo suelto no tiene esas líneas:
+        # se factura como una línea normal, con su precio y su descuento.
+        self.ensure_one()
+        if not self._combo_suelto():
+            return super()._prepare_invoice_line(**optional_values)
+        valores = {
+            "display_type": "product",
+            "sequence": self.sequence,
+            "name": self.env["account.move.line"]._get_journal_items_full_name(
+                self.name, self.product_id.display_name
+            ),
+            "product_id": self.product_id.id,
+            "product_uom_id": self.product_uom_id.id,
+            "quantity": self.qty_to_invoice,
+            "discount": self.discount,
+            "price_unit": self.price_unit,
+            "tax_ids": [Command.set(self.tax_ids.ids)],
+            "sale_line_ids": [Command.link(self.id)],
+        }
+        valores.update(optional_values)
+        return valores
+
+    @api.depends("qty_invoiced", "qty_delivered", "product_uom_qty", "state")
+    def _compute_qty_to_invoice(self):
+        # Odoo solo deja facturar un combo si alguna de sus líneas hijas es facturable; un combo
+        # suelto se factura por la cantidad vendida, como cualquier producto con política "pedido"
+        super()._compute_qty_to_invoice()
+        for line in self:
+            if line.state == "sale" and not line.display_type and line._combo_suelto():
+                line.qty_to_invoice = line.product_uom_qty - line.qty_invoiced
+
+    @api.depends("price_total", "order_id.order_line.price_total")
     def _compute_subtotal_linea(self):
         for line in self:
-            line.subtotal_linea = line.price_total
+            if line.product_id.type == "combo":
+                # La fila del combo no tiene precio propio (Odoo lo pone en sus productos):
+                # se muestra la suma de las líneas de los productos que lo componen
+                hijas = line.order_id.order_line.filtered(
+                    lambda h: h.combo_item_id
+                    and (
+                        (h.linked_line_id and h.linked_line_id == line)
+                        or (h.linked_virtual_id and h.linked_virtual_id == line.virtual_id)
+                    )
+                )
+                line.subtotal_linea = sum(hijas.mapped("price_total")) if hijas else line.price_total
+            else:
+                line.subtotal_linea = line.price_total
 
     # Se vuelve a calcular el descuento cuando cambia el cliente de la venta
     @api.depends("order_id.partner_id")
@@ -41,19 +101,30 @@ class SaleOrderLine(models.Model):
             # Se suma la cantidad pedida de cada producto en toda la venta
             pedido = {}
             for line in orden.order_line.filtered(
-                lambda l: l.product_id.is_storable and not l.display_type
+                # Goods con inventario y combos (que tienen su propio stock); el servicio no
+                lambda l: (
+                    (l.product_id.type == "consu" and l.product_id.is_storable)
+                    or l.product_id.type == "combo"
+                )
+                and not l.display_type
             ):
                 producto = line.product_id
                 pedido[producto] = pedido.get(producto, 0.0) + line.product_uom_id._compute_quantity(
                     line.product_uom_qty, producto.uom_id
                 )
             for producto, cantidad in pedido.items():
-                if cantidad > producto.qty_available:
+                # Goods: existencias reales. Combo: el stock escrito en su tarjeta de stock
+                disponible = (
+                    producto.product_tmpl_id.stock_actual
+                    if producto.type == "combo"
+                    else producto.qty_available
+                )
+                if cantidad > disponible:
                     raise ValidationError(
                         _("Stock insuficiente de '%(producto)s': disponible %(stock)g, solicitado %(cantidad)g.")
                         % {
                             "producto": producto.display_name,
-                            "stock": producto.qty_available,
+                            "stock": disponible,
                             "cantidad": cantidad,
                         }
                     )
@@ -185,8 +256,20 @@ class SaleOrder(models.Model):
             "amount_total": order.amount_total,
         }
 
+    def _mover_stock_combos(self, signo):
+        # Los combos sueltos llevan su propio stock (stock_actual): se descuenta al confirmar la
+        # venta (signo=-1) y se devuelve al cancelarla (signo=1). Nunca baja de 0.
+        for linea in self.order_line:
+            if linea.display_type or not linea._combo_suelto():
+                continue
+            producto = linea.product_id.product_tmpl_id
+            producto.stock_actual = max(producto.stock_actual + signo * linea.product_uom_qty, 0)
+
     def action_confirm(self):
+        # Solo las ventas que se confirman ahora (las que aún no estaban confirmadas)
+        por_confirmar = self.filtered(lambda v: v.state in ("draft", "sent"))
         result = super().action_confirm()
+        por_confirmar._mover_stock_combos(-1)
 
         pickings = self.env["stock.picking"].search(
             [

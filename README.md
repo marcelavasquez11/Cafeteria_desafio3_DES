@@ -1,4 +1,4 @@
-# ☕ Cafetería — Odoo 19
+# ☕ Cafetería Marymel — Odoo 19
 
 Sistema de gestión para una cafetería desarrollado con **Odoo 19** y **PostgreSQL 16**, utilizando Docker para facilitar su instalación y ejecución.
 
@@ -249,7 +249,7 @@ Factura pagada
 
 ## 📌 Información del proyecto
 
-**Proyecto:** Cafetería  
+**Proyecto:** Cafetería Marymel  
 **Plataforma:** Odoo 19  
 **Base de datos:** PostgreSQL 16  
 **Contenedores:** Docker  
