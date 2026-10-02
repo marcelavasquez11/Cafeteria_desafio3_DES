@@ -7,6 +7,18 @@ from odoo.exceptions import UserError, ValidationError
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
+    # Subtotal de la línea con el descuento ya reflejado (es lo que paga el cliente por esa línea)
+    subtotal_linea = fields.Monetary(
+        string="Subtotal",
+        compute="_compute_subtotal_linea",
+        currency_field="currency_id",
+    )
+
+    @api.depends("price_total")
+    def _compute_subtotal_linea(self):
+        for line in self:
+            line.subtotal_linea = line.price_total
+
     # Se vuelve a calcular el descuento cuando cambia el cliente de la venta
     @api.depends("order_id.partner_id")
     def _compute_discount(self):

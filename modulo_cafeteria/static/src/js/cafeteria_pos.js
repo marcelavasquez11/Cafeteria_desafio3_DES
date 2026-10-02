@@ -16,6 +16,9 @@ class CafeteriaPos extends Component {
         this.totalsRequestId = 0;
         this.state = useState({
             products: [],
+            // Filtros del catálogo: texto de búsqueda y categoría interna (false = todas)
+            busqueda: "",
+            categoriaId: false,
             cart: [],
             totals: {
                 amount_untaxed: 0,
@@ -50,6 +53,7 @@ class CafeteriaPos extends Component {
                 ],
                 [
                     "name",
+                    "categ_id",
                     "list_price",
                     "qty_available",
                     "stock_bajo",
@@ -65,6 +69,28 @@ class CafeteriaPos extends Component {
         } finally {
             this.state.loading = false;
         }
+    }
+
+    // Categorías internas que tienen productos, para los botones de filtro
+    get categorias() {
+        const categorias = new Map();
+        for (const producto of this.state.products) {
+            if (producto.categ_id) {
+                categorias.set(producto.categ_id[0], producto.categ_id[1]);
+            }
+        }
+        return [...categorias].map(([id, nombre]) => ({ id, nombre }));
+    }
+
+    // Productos que cumplen el texto buscado y la categoría elegida
+    get productosFiltrados() {
+        const texto = this.state.busqueda.trim().toLowerCase();
+        return this.state.products.filter(
+            (producto) =>
+                (!this.state.categoriaId ||
+                    (producto.categ_id && producto.categ_id[0] === this.state.categoriaId)) &&
+                (!texto || producto.name.toLowerCase().includes(texto))
+        );
     }
 
     get currencyId() {
@@ -231,7 +257,7 @@ class CafeteriaPos extends Component {
         }
 
         this.state.cart = [];
-        this.state.checkoutSuccess = `Venta ${order.name} realizada correctamente. Total: ${this.formatMoney(order.amount_total)}`;
+        this.state.checkoutSuccess = `Venta ${order.name} creada. Registre el pago. Total: ${this.formatMoney(order.amount_total)}`;
 
         try {
             await this.action.doAction({

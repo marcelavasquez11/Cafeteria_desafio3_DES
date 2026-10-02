@@ -21,8 +21,100 @@
                 <attribute name="invisible">True</attribute>
             </xpath>
 
-            <xpath expr="//field[@name='tax_totals']" position="attributes">
-                <attribute name="class" add="o_cafeteria_sale_tax_totals" separator=" "/>
+            <!-- Resumen de la venta: subtotal (sin descuento), descuento y total -->
+            <xpath expr="//field[@name='tax_totals']" position="replace">
+                <div class="o_cafeteria_resumen">
+                    <div class="o_cafeteria_resumen_fila">
+                        <span>Subtotal</span>
+                        <field name="subtotal_cafeteria" widget="monetary" readonly="1" nolabel="1"/>
+                    </div>
+                    <div class="o_cafeteria_resumen_fila o_cafeteria_resumen_descuento">
+                        <span>Descuento</span>
+                        <field name="descuento_cafeteria" widget="monetary" readonly="1" nolabel="1"/>
+                    </div>
+                    <div class="o_cafeteria_resumen_total">
+                        <span>Total</span>
+                        <field name="amount_total" widget="monetary" readonly="1" nolabel="1"/>
+                    </div>
+                </div>
+            </xpath>
+
+            <!-- Paso de pago: método, efectivo recibido y vuelto (antes de facturar) -->
+            <xpath expr="//notebook" position="before">
+                <group name="pago_cafeteria" string="Pago">
+                    <group>
+                        <field name="metodo_pago" widget="radio" options="{'horizontal': true}"
+                               readonly="estado_venta != 'pendiente'"/>
+                        <field name="efectivo_recibido" widget="monetary"
+                               invisible="metodo_pago != 'efectivo'"
+                               readonly="estado_venta != 'pendiente'"/>
+                        <field name="vuelto" widget="monetary"
+                               invisible="metodo_pago != 'efectivo'"/>
+                    </group>
+                    <!-- Simulación del datáfono: marca, últimos 4 dígitos y aprobación -->
+                    <group invisible="metodo_pago != 'tarjeta'">
+                        <field name="tarjeta_marca" widget="radio" options="{'horizontal': true}"
+                               readonly="estado_venta != 'pendiente' or tarjeta_estado == 'aprobada'"/>
+                        <field name="tarjeta_ultimos4" placeholder="0000"
+                               readonly="estado_venta != 'pendiente' or tarjeta_estado == 'aprobada'"/>
+                        <field name="tarjeta_estado" widget="badge"
+                               decoration-success="tarjeta_estado == 'aprobada'"
+                               decoration-danger="tarjeta_estado == 'rechazada'"
+                               invisible="not tarjeta_estado"/>
+                        <field name="tarjeta_autorizacion" invisible="tarjeta_estado != 'aprobada'"/>
+                        <div colspan="2" invisible="estado_venta != 'pendiente' or tarjeta_estado == 'aprobada'">
+                            <button name="action_procesar_tarjeta" type="object"
+                                    string="Procesar pago con tarjeta" icon="fa-credit-card"
+                                    class="btn-secondary"/>
+                        </div>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- Tabla de productos: cantidad, precio unitario, descuento y subtotal -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='qty_delivered']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='qty_invoiced']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='customer_lead']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_qty']" position="attributes">
+                <attribute name="string">Cantidad</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='price_unit']" position="attributes">
+                <attribute name="string">Precio unitario</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='discount']" position="attributes">
+                <attribute name="groups">base.group_user</attribute>
+                <attribute name="string">Desc %</attribute>
+                <attribute name="optional">show</attribute>
+            </xpath>
+            <!-- Subtotal de la línea con el descuento ya reflejado; se ocultan los subtotales de Odoo -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='price_subtotal']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='price_total']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='discount']" position="after">
+                <field name="subtotal_linea" string="Subtotal" widget="monetary"/>
+            </xpath>
+
+            <!-- Estados de la venta: pendiente, pagada o cancelada -->
+            <xpath expr="//header" position="replace">
+                <header>
+                    <button name="action_facturar" type="object" string="Facturar"
+                            class="btn-primary" invisible="estado_venta != 'pendiente'"
+                            confirm="Se creará la factura con el pago registrado y ya no podrá modificar la venta. ¿Continuar?"/>
+                    <button name="action_cancelar_venta" type="object" string="Cancelar venta"
+                            invisible="estado_venta != 'pendiente'"
+                            confirm="¿Cancelar la venta? Si ya se entregó, el stock regresa al inventario."/>
+                    <field name="estado_venta" widget="statusbar"
+                           statusbar_visible="pendiente,pagada"/>
+                </header>
             </xpath>
 
         </field>
@@ -34,6 +126,20 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.sale_order_tree"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="estado_venta" widget="badge"
+                       decoration-warning="estado_venta == 'pendiente'"
+                       decoration-success="estado_venta == 'pagada'"
+                       decoration-muted="estado_venta == 'cancelada'"/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="optional"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_status']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+                <attribute name="optional"/>
+            </xpath>
             <xpath expr="//field[@name='user_id']" position="attributes">
                 <attribute name="column_invisible">True</attribute>
                 <attribute name="optional"/>
@@ -58,6 +164,20 @@
             <xpath expr="//field[@name='activity_ids']" position="attributes">
                 <attribute name="column_invisible">True</attribute>
                 <attribute name="optional"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Búsqueda de ventas: panel lateral para filtrar por estado -->
+    <record id="view_sale_order_search_cafeteria" model="ir.ui.view">
+        <field name="name">sale.order.search.cafeteria</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_sale"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <searchpanel>
+                    <field name="estado_venta" string="Estado" select="one" enable_counters="1"/>
+                </searchpanel>
             </xpath>
         </field>
     </record>

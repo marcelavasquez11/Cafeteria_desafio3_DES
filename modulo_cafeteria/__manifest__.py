@@ -18,7 +18,7 @@
     'website': '',
 
     'category': 'Sales',
-    'version': '1.3.1',
+    'version': '1.4.0',
 
     'depends': [
     'base',

@@ -117,7 +117,11 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name" string="Producto"/>
-                <field name="categ_id"/>
+                <field name="categ_id" string="Categoría"/>
+                <!-- Panel lateral: clic en una categoría interna para filtrar -->
+                <searchpanel>
+                    <field name="categ_id" string="Categoría" select="multi" enable_counters="1"/>
+                </searchpanel>
                 <filter name="filtro_stock_bajo" string="Stock bajo"
                         domain="[('estado_stock', '=', 'bajo')]"/>
                 <filter name="filtro_agotado" string="Agotados"

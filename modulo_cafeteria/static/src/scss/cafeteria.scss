@@ -715,3 +715,50 @@
 
 // Etiqueta de estado de stock sin fondo (solo texto de color)
 .o_cafeteria_stock_estado { font-size: 1.1rem; font-weight: 600; }
+
+// Buscador y filtro por categoría en el carrito
+.o_cafeteria_filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.o_cafeteria_categories { display: flex; flex-wrap: wrap; gap: 8px; }
+.o_cafeteria_categories button {
+    padding: 6px 14px;
+    border: 1px solid #dce3de;
+    border-radius: 999px;
+    background: #fff;
+    color: #24332d;
+    font-weight: 600;
+}
+.o_cafeteria_categories button.active { background: #176b52; border-color: #176b52; color: #fff; }
+
+// ---- Ventas: resumen de la venta (subtotal, descuento, total) ----
+.o_cafeteria_resumen {
+    width: 100%;
+    max-width: 320px;
+    margin-left: auto;
+
+    .o_cafeteria_resumen_fila,
+    .o_cafeteria_resumen_total {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 0;
+    }
+
+    .o_field_widget { width: auto; text-align: right; font-weight: 600; }
+
+    // Total: solo letras verdes y más grandes
+    .o_cafeteria_resumen_total {
+        margin-top: 4px;
+        padding-top: 8px;
+        border-top: 1px solid #dce3de;
+        color: #176b52;
+
+        > span { font-size: 1.1rem; font-weight: 700; }
+        .o_field_widget { color: #176b52; font-size: 1.5rem; font-weight: 700; }
+    }
+}
+
+// Pago: vuelto resaltado
+.o_form_view .o_field_widget[name="vuelto"] {
+    font-weight: 700;
+    color: #176b52;
+}

@@ -5,3 +5,4 @@ from . import cliente
 from . import stock_picking
 from . import dashboard
 from . import combo
+from . import venta

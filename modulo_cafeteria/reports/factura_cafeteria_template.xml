@@ -12,6 +12,7 @@
     <template id="factura_cafeteria_document">
         <t t-set="company_partner" t-value="o.company_id.partner_id"/>
         <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
+        <t t-set="venta" t-value="o.invoice_line_ids.sale_line_ids.order_id[:1]"/>
         <style type="text/css">
             .cafeteria-invoice { color: #24332d; font-family: "DejaVu Sans", sans-serif; font-size: 10px; }
             .cafeteria-invoice h1, .cafeteria-invoice h2, .cafeteria-invoice h3 { margin: 0; }
@@ -43,7 +44,7 @@
             .cafeteria-invoice .details-grid td { padding: 3px 12px 3px 0; vertical-align: top; }
             .cafeteria-invoice .words, .cafeteria-invoice .observations { margin-top: 10px; }
             .cafeteria-invoice .words-content, .cafeteria-invoice .observations-content { border: 1px solid #dce3de; min-height: 22px; padding: 6px; }
-            .cafeteria-invoice .legal-footer { border-top: 1px solid #dce3de; bottom: -12mm; color: #69766f; font-size: 8px; left: 0; padding-top: 4px; position: fixed; right: 0; text-align: center; }
+            .cafeteria-invoice .legal-footer { border-top: 1px solid #dce3de; color: #69766f; font-size: 8px; margin-top: 14px; padding-top: 4px; text-align: center; page-break-inside: avoid; }
         </style>
 
         <div class="page cafeteria-invoice">
@@ -186,19 +187,29 @@
                         <div class="section-title">INFORMACIÓN DE PAGO</div>
                         <div><strong>Condición de la operación:</strong>
                             <t t-if="o.invoice_payment_term_id"><span t-field="o.invoice_payment_term_id.name"/></t>
-                            <t t-elif="o.payment_state == 'paid'">CONTADO</t>
-                            <t t-else="">No especificada</t>
+                            <t t-elif="o.payment_state in ('paid', 'in_payment')">CONTADO</t>
+                            <t t-else="">PENDIENTE DE PAGO</t>
                         </div>
                         <div><strong>Forma de pago:</strong>
-                            <t t-if="o.matched_payment_ids">
+                            <t t-if="venta.metodo_pago == 'tarjeta'">Tarjeta
+                                <t t-if="venta.tarjeta_marca">(<span t-field="venta.tarjeta_marca"/><t t-if="venta.tarjeta_ultimos4"> **** <span t-field="venta.tarjeta_ultimos4"/></t>)</t>
+                            </t>
+                            <t t-elif="venta.metodo_pago == 'efectivo'">Efectivo</t>
+                            <t t-elif="o.matched_payment_ids">
                                 <t t-foreach="o.matched_payment_ids" t-as="payment">
-                                    <div>
-                                        <span t-field="payment.journal_id.name"/>
-                                        <t t-if="payment.payment_method_line_id"> / <span t-field="payment.payment_method_line_id.name"/></t>
-                                    </div>
+                                    <span t-field="payment.journal_id.name"/>
                                 </t>
                             </t>
-                            <t t-else="">Efectivo</t>
+                            <t t-else="">No especificada</t>
+                        </div>
+                        <div t-if="venta.metodo_pago == 'tarjeta' and venta.tarjeta_autorizacion">
+                            <strong>Código de autorización:</strong> <span t-field="venta.tarjeta_autorizacion"/>
+                        </div>
+                        <div t-if="venta.metodo_pago == 'efectivo' and venta.efectivo_recibido">
+                            <strong>Efectivo recibido:</strong> <span t-field="venta.efectivo_recibido"/>
+                        </div>
+                        <div t-if="venta.metodo_pago == 'efectivo' and venta.efectivo_recibido">
+                            <strong>Vuelto:</strong> <span t-field="venta.vuelto"/>
                         </div>
                     </td>
                     <td style="width: 50%;">

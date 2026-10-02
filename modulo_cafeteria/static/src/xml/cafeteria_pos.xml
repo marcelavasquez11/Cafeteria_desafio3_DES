@@ -23,8 +23,31 @@
                     <div t-elif="!state.products.length" class="o_cafeteria_pos_message">
                         No hay productos disponibles.
                     </div>
+                    <t t-else="">
+                    <!-- Buscador y filtro por categoría interna -->
+                    <div class="o_cafeteria_filters">
+                        <input type="search" class="form-control o_cafeteria_search"
+                               placeholder="Buscar producto..."
+                               t-model="state.busqueda"/>
+                        <div class="o_cafeteria_categories">
+                            <button type="button"
+                                    t-att-class="{ 'active': !state.categoriaId }"
+                                    t-on-click="() => state.categoriaId = false">
+                                Todas
+                            </button>
+                            <button t-foreach="categorias" t-as="categoria" t-key="categoria.id"
+                                    type="button"
+                                    t-att-class="{ 'active': state.categoriaId === categoria.id }"
+                                    t-on-click="() => state.categoriaId = categoria.id">
+                                <t t-esc="categoria.nombre"/>
+                            </button>
+                        </div>
+                    </div>
+                    <div t-if="!productosFiltrados.length" class="o_cafeteria_pos_message">
+                        No hay productos que coincidan con la búsqueda.
+                    </div>
                     <div t-else="" class="o_cafeteria_products_grid">
-                        <t t-foreach="state.products" t-as="product" t-key="product.id">
+                        <t t-foreach="productosFiltrados" t-as="product" t-key="product.id">
                             <article class="o_cafeteria_product">
                                 <div class="o_cafeteria_product_image">
                                     <img
@@ -64,6 +87,7 @@
                             </article>
                         </t>
                     </div>
+                    </t>
                 </section>
 
                 <aside class="o_cafeteria_cart" aria-label="Carrito">
@@ -191,7 +215,7 @@
                             t-att-disabled="!state.cart.length || !state.selectedPartner || state.checkoutLoading"
                         >
                             <t t-if="state.checkoutLoading">Procesando...</t>
-                            <t t-else="">Cobrar</t>
+                            <t t-else="">Ir a pago</t>
                         </button>
                     </div>
                 </aside>

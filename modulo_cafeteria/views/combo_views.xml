@@ -29,13 +29,4 @@
         </field>
     </record>
 
-    <!-- Menú para ver y eliminar las elecciones de combo ya guardadas -->
-    <menuitem
-        id="menu_cafeteria_combos"
-        name="Combos"
-        parent="menu_cafeteria_root"
-        action="product.product_combo_action"
-        sequence="12"
-    />
-
 </odoo>
