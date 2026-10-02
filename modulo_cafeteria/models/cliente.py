@@ -30,6 +30,10 @@ class ClienteCafeteria(models.Model):
         copy=False,
     )
 
+    # Cliente genérico "Consumidor final": se usa cuando el cliente no quiere ser registrado.
+    # No tiene datos y nunca cambia de categoría ni se borra.
+    es_consumidor_final = fields.Boolean(string="Consumidor final", copy=False)
+
     # Documento Único de Identidad (se escribe con la máscara 00000000-0)
     dui = fields.Char(string="DUI", size=10)
 
@@ -97,8 +101,10 @@ class ClienteCafeteria(models.Model):
         # Un cliente regular pasa a frecuente al acumular el monto mínimo en compras
         # (no toca a los corporativos ni baja de categoría a nadie)
         for cliente in self:
+            # El consumidor final junta las compras de mucha gente distinta: nunca sube de categoría
             if (
-                cliente.categoria_cliente == "regular"
+                not cliente.es_consumidor_final
+                and cliente.categoria_cliente == "regular"
                 and cliente.total_compras >= MONTO_CLIENTE_FRECUENTE
             ):
                 cliente.categoria_cliente = "frecuente"
@@ -143,3 +149,9 @@ class ClienteCafeteria(models.Model):
                     _("El teléfono '%s' no es válido (use solo números, +, - y paréntesis; 7 a 15 dígitos).")
                     % cliente.phone
                 )
+
+    def unlink(self):
+        # El cliente "Consumidor final" es parte del sistema: no se puede borrar
+        if any(cliente.es_consumidor_final for cliente in self):
+            raise ValidationError(_("El cliente 'Consumidor final' no se puede borrar."))
+        return super().unlink()

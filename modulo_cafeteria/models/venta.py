@@ -156,25 +156,28 @@ class VentaCafeteria(models.Model):
                 % self.currency_id.format(self.amount_total - self.efectivo_recibido)
             )
 
-        if self.state in ("draft", "sent"):
-            self.action_confirm()
+        # sudo(): el cajero no tiene permisos de inventario ni de contabilidad, pero el sistema
+        # debe confirmar la venta, crear y publicar la factura y registrar el pago
+        venta = self.sudo()
+        if venta.state in ("draft", "sent"):
+            venta.action_confirm()
 
-        factura = self._create_invoices()
+        factura = venta._create_invoices()
         factura.action_post()
 
         # Efectivo: diario de efectivo si existe (si no, el de banco). Tarjeta: diario de banco
-        diarios = self.env["account.journal"]
+        diarios = self.env["account.journal"].sudo()
         dominio = [("company_id", "=", self.company_id.id)]
         if self.metodo_pago == "efectivo":
             diarios = diarios.search(dominio + [("type", "=", "cash")], limit=1)
-        diario = diarios or self.env["account.journal"].search(
+        diario = diarios or self.env["account.journal"].sudo().search(
             dominio + [("type", "=", "bank")], limit=1
         )
-        self.env["account.payment.register"].with_context(
+        self.env["account.payment.register"].sudo().with_context(
             active_model="account.move", active_ids=factura.ids
         ).create({"journal_id": diario.id})._create_payments()
 
-        self.with_context(permitir_edicion_pagada=True).estado_venta = "pagada"
+        venta.with_context(permitir_edicion_pagada=True).estado_venta = "pagada"
 
         # Se abre la factura en PDF para imprimirla. Odoo 19 devuelve primero un diálogo de
         # "Enviar e imprimir"; se toma de ahí la acción del PDF para abrirlo directo
@@ -188,19 +191,22 @@ class VentaCafeteria(models.Model):
         if self.estado_venta != "pendiente":
             raise UserError(_("Solo se puede cancelar una venta pendiente."))
 
+        # sudo(): el cajero no tiene permisos de inventario, pero el stock debe regresar
+        venta = self.sudo()
+
         # Si ya se entregó, se devuelven las unidades al inventario
-        for entrega in self.picking_ids.filtered(
+        for entrega in venta.picking_ids.filtered(
             lambda p: p.state == "done" and p.picking_type_code == "outgoing"
         ):
-            asistente = self.env["stock.return.picking"].with_context(
+            asistente = venta.env["stock.return.picking"].with_context(
                 active_id=entrega.id, active_model="stock.picking"
             ).create({})
-            devolucion = self.env["stock.picking"].browse(
+            devolucion = venta.env["stock.picking"].browse(
                 asistente.action_create_returns_all()["res_id"]
             )
             devolucion.with_context(skip_sms=True).button_validate()
 
-        self._action_cancel()
+        venta._action_cancel()
 
     def _action_cancel(self):
         if any(venta.estado_venta == "pagada" for venta in self):
@@ -211,6 +217,13 @@ class VentaCafeteria(models.Model):
         confirmadas._mover_stock_combos(1)
         self.with_context(permitir_edicion_pagada=True).estado_venta = "cancelada"
         return resultado
+
+    # --- Borrar ventas: solo el Administrador (el Cajero cancela, no borra) ----------------------
+
+    def unlink(self):
+        if not self.env.su and not self.env.user.has_group("modulo_cafeteria.grupo_administrador"):
+            raise UserError(_("Solo el Administrador puede borrar ventas. Use Cancelar venta."))
+        return super().unlink()
 
     # --- Una venta pagada ya no se modifica ---------------------------------------------------
 

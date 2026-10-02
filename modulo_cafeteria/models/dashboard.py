@@ -2,7 +2,8 @@ from datetime import datetime, time, timedelta
 
 import pytz
 
-from odoo import api, models
+from odoo import _, api, models
+from odoo.exceptions import AccessError
 
 from .cliente import ESTADOS_COMPRA
 
@@ -39,6 +40,7 @@ class CafeteriaDashboard(models.AbstractModel):
 
     @api.model
     def ventas_grafico(self, semanas=1):
+        self._solo_administrador()
         # Datos del gráfico de ventas.
         # semanas=1: ventas de cada día de la semana actual (lunes a domingo).
         # semanas=4, 8 o 12: total vendido en cada una de las últimas N semanas (incluye la actual).
@@ -72,8 +74,14 @@ class CafeteriaDashboard(models.AbstractModel):
             montos[(dia - inicio).days // dias_por_punto] += venta.amount_total
         return {"etiquetas": etiquetas, "montos": montos}
 
+    def _solo_administrador(self):
+        # El Dashboard muestra las cifras del negocio: lo ve solo el Administrador
+        if not self.env.su and not self.env.user.has_group("modulo_cafeteria.grupo_administrador"):
+            raise AccessError(_("El Dashboard es solo para el Administrador."))
+
     @api.model
     def obtener_datos(self):
+        self._solo_administrador()
         tz = pytz.timezone(self.env.user.tz or "UTC")
         hoy = datetime.now(tz).date()
 

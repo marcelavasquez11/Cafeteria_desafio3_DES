@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Usuario de ejemplo con el rol Cajero (solo ve Carrito y Ventas). Se carga una sola vez. -->
+    <data noupdate="1">
+        <record id="usuario_cajero_seed" model="res.users">
+            <field name="name">Cajero Marymel</field>
+            <field name="login">cajero</field>
+            <field name="password">cajero123</field>
+            <field name="email">cajero@correo.com</field>
+            <field name="group_ids" eval="[(6, 0, [ref('modulo_cafeteria.grupo_cajero')])]"/>
+        </record>
+    </data>
+</odoo>

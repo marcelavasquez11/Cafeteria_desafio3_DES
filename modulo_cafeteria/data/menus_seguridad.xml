@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Oculta las aplicaciones nativas de Odoo al Cajero; se vuelve a aplicar en cada actualización -->
+    <function model="ir.ui.menu" name="restringir_menus_cafeteria"/>
+</odoo>

@@ -1,1 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+acceso_cajero_cliente,Cajero: agregar clientes,base.model_res_partner,modulo_cafeteria.grupo_cajero,1,0,1,0
+acceso_cajero_factura,Cajero: leer facturas (para imprimirlas),account.model_account_move,modulo_cafeteria.grupo_cajero,1,0,0,0
+acceso_cajero_linea_factura,Cajero: leer líneas de factura,account.model_account_move_line,modulo_cafeteria.grupo_cajero,1,0,0,0
+acceso_cajero_pago,Cajero: leer pagos,account.model_account_payment,modulo_cafeteria.grupo_cajero,1,0,0,0
+acceso_cajero_diario,Cajero: leer diarios,account.model_account_journal,modulo_cafeteria.grupo_cajero,1,0,0,0
+acceso_cajero_mov_stock,Cajero: leer movimientos de stock,stock.model_stock_move,modulo_cafeteria.grupo_cajero,1,0,0,0
+acceso_cajero_entrega,Cajero: leer entregas,stock.model_stock_picking,modulo_cafeteria.grupo_cajero,1,0,0,0

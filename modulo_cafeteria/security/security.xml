@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Sección "Cafetería Marymel" en la pantalla de usuarios, con sus dos roles -->
+    <record id="categoria_cafeteria" model="ir.module.category">
+        <field name="name">Cafetería Marymel</field>
+    </record>
+
+    <record id="privilegio_cafeteria" model="res.groups.privilege">
+        <field name="name">Cafetería Marymel</field>
+        <field name="category_id" ref="categoria_cafeteria"/>
+    </record>
+
+    <!-- Cajero: atiende al público. Solo ve Carrito y Ventas y solo puede agregar clientes -->
+    <record id="grupo_cajero" model="res.groups">
+        <field name="name">Cajero</field>
+        <field name="privilege_id" ref="privilegio_cafeteria"/>
+        <!-- Incluye el rol nativo "Ventas: todos los documentos" para poder crear y editar ventas -->
+        <field name="implied_ids"
+               eval="[(4, ref('base.group_user')),
+                      (4, ref('sales_team.group_sale_salesman_all_leads'))]"/>
+    </record>
+
+    <!-- Administrador: ve todo (Dashboard, Inventario, Clientes) y conserva sus permisos de Odoo -->
+    <record id="grupo_administrador" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="privilege_id" ref="privilegio_cafeteria"/>
+        <field name="implied_ids"
+               eval="[(4, ref('grupo_cajero')),
+                      (4, ref('sales_team.group_sale_manager')),
+                      (4, ref('stock.group_stock_manager')),
+                      (4, ref('account.group_account_manager'))]"/>
+        <!-- El usuario admin pasa a ser Administrador de la cafetería -->
+        <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+</odoo>

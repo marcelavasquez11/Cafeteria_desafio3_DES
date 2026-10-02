@@ -105,6 +105,7 @@
     <menuitem
         id="menu_cafeteria_root"
         name="Cafetería Marymel"
+        groups="grupo_cajero"
         sequence="10"
     />
 
@@ -114,6 +115,7 @@
         id="menu_cafeteria_dashboard"
         name="Dashboard"
         parent="menu_cafeteria_root"
+        groups="grupo_administrador"
         action="action_cafeteria_dashboard"
         sequence="1"
     />
@@ -123,6 +125,7 @@
         id="menu_cafeteria_productos"
         name="Inventario"
         parent="menu_cafeteria_root"
+        groups="grupo_administrador"
         action="action_cafeteria"
         sequence="10"
     />
@@ -131,6 +134,7 @@
         id="menu_cafeteria_carrito"
         name="Carrito"
         parent="menu_cafeteria_root"
+        groups="grupo_cajero"
         action="action_cafeteria_pos"
         sequence="5"
     />
@@ -139,6 +143,7 @@
         id="menu_cafeteria_clientes"
         name="Clientes"
         parent="menu_cafeteria_root"
+        groups="grupo_administrador"
         action="action_clientes_cafeteria"
         sequence="15"
     />
@@ -147,6 +152,7 @@
         id="menu_cafeteria_ventas"
         name="Ventas"
         parent="menu_cafeteria_root"
+        groups="grupo_cajero"
         action="sale.action_orders"
         sequence="20"
     />

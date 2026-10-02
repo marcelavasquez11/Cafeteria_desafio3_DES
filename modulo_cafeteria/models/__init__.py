@@ -7,3 +7,4 @@ from . import dashboard
 from . import combo
 from . import venta
 from . import factura
+from . import seguridad

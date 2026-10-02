@@ -262,7 +262,8 @@ class SaleOrder(models.Model):
         for linea in self.order_line:
             if linea.display_type or not linea._combo_suelto():
                 continue
-            producto = linea.product_id.product_tmpl_id
+            # sudo(): el cajero no edita productos, pero el sistema sí actualiza este stock
+            producto = linea.product_id.product_tmpl_id.sudo()
             producto.stock_actual = max(producto.stock_actual + signo * linea.product_uom_qty, 0)
 
     def action_confirm(self):
@@ -271,7 +272,8 @@ class SaleOrder(models.Model):
         result = super().action_confirm()
         por_confirmar._mover_stock_combos(-1)
 
-        pickings = self.env["stock.picking"].search(
+        # sudo(): el cajero no tiene permisos de inventario, pero la entrega debe validarse
+        pickings = self.env["stock.picking"].sudo().search(
             [
                 ("move_ids.sale_line_id.order_id", "in", self.ids),
                 ("state", "not in", ("done", "cancel")),
@@ -285,6 +287,7 @@ class SaleOrder(models.Model):
                 picking.button_validate()
 
         # Al confirmar, el cliente puede subir de regular a frecuente
-        self.partner_id.actualizar_categoria_por_compras()
+        # sudo(): el cajero no edita clientes, pero el sistema sí puede subirlos de categoría
+        self.partner_id.sudo().actualizar_categoria_por_compras()
 
         return result

@@ -18,7 +18,7 @@
     'website': '',
 
     'category': 'Sales',
-    'version': '1.5.0',
+    'version': '1.6.5',
 
     'depends': [
     'base',
@@ -31,6 +31,7 @@
     ],
 
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/producto_views.xml',
         'views/cliente_views.xml',
@@ -41,6 +42,8 @@
         'data/productos_seed.xml',
         'data/clientes_seed.xml',
         'data/ventas_seed.xml',
+        'data/usuarios_seed.xml',
+        'data/menus_seguridad.xml',
         "views/sale_order_views.xml",
         'views/account_move_cafeteria_views.xml',
         'reports/factura_cafeteria_template.xml',
