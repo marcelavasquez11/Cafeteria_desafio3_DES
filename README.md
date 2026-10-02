@@ -257,5 +257,15 @@ Factura pagada
 
 ---
 
+---
 
-> Proyecto desarrollado con fines académicos.
+## 👥 Equipo de desarrollo
+
+### ☕ Cafetería Marymel
+
+- **Wendy Aguilar**
+- **Melissa Flores**
+
+---
+
+> *Proyecto desarrollado con Odoo 19, PostgreSQL 16 y Docker con fines académicos · 2026*
